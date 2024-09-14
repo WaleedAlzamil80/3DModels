@@ -12,12 +12,16 @@ path = "/home/waleed/Documents/CROWNGENERATION/datasets/osfstorage-archive/all_d
 mesh = trimesh.load(path)
 
 # Convert to PyTorch tensors
-vertices_tensor = torch.tensor(mesh.vertices, dtype=torch.float32)
+vertices_tensor = torch.tensor(mesh.vertices, dtype=torch.float32).unsqueeze(0).transpose(1, 2)
 
+print("Ready: ", vertices_tensor.shape)
 # Check if faces exist and convert them too
 faces_tensor = torch.tensor(mesh.faces, dtype=torch.long) if mesh.faces is not None else None
 
-model = PointNet(mode="segmentation", k = 32)
+model = PointNet(mode="segmentation", k = 33)
 
 x, inT, feT = model(vertices_tensor)
 regurization = tnet_regularization(inT) + tnet_regularization(feT)
+print("Total: ", regurization.item(),", input: ", tnet_regularization(inT).item(),", feature: ", tnet_regularization(feT).item())
+print("Output: ", x.shape)
+print(torch.argmax(x, dim=1))
