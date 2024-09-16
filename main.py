@@ -16,7 +16,8 @@ def parse_args():
     parser.add_argument('--path', type=str, default="dataset", help="Path of the dataset")
     parser.add_argument('--output', type=str, default="output", help="Output path")
 
-    parser.add_argument('--test_ids', type=str, default="dataset/test", help="Path of the ids dataset for testing")
+    parser.add_argument('--test_ids', type=str, default="private-testing-set.txt", help="Path of the ids dataset for testing")
+    parser.add_argument('--p', type=int, default=3, help="data parts")
 
     parser.add_argument('--k', type=int, default=33, help="Number classes")
     parser.add_argument('--mode', type=str, default="segmentation", help="Problems ex:- segmentaion, classification")
@@ -29,7 +30,7 @@ args = parse_args()
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
 
-train_loader, test_loader = get_data_loaders(args.path, args.batch_size, args.test_ids)
+train_loader, test_loader = get_data_loaders(args)
 model = PointNet(mode = args.mode, k = args.k).to(device)
 model = nn.DataParallel(model).to(device)
 

@@ -5,7 +5,7 @@ import numpy as np
 import trimesh
 
 class TeethSegmentationDataset(Dataset):
-    def __init__(self, root_dir, split='train', test_ids_file='private-testing-set/private-testing-set.txt', transform=None):
+    def __init__(self, root_dir, split='train', test_ids_file='private-testing-set/private-testing-set.txt', transform=None, p=7):
         """
         Args:
             root_dir (string): Directory with all the parts (data_part_{1-6}).
@@ -16,6 +16,7 @@ class TeethSegmentationDataset(Dataset):
         self.root_dir = root_dir
         self.split = split
         self.transform = transform
+        self.p = p
         self.test_ids = self._load_test_ids(test_ids_file)
         self.data_list = self._prepare_data_list()
 
@@ -28,7 +29,7 @@ class TeethSegmentationDataset(Dataset):
     def _prepare_data_list(self):
         """Prepare the list of data paths for training or testing."""
         data_list = []
-        for part in range(1, 7):
+        for part in range(1, self.p + 1):
             part_dir = os.path.join(self.root_dir, f'data_part_{part}')
             for region in ['lower', 'upper']:
                 region_dir = os.path.join(part_dir, region)
@@ -72,13 +73,13 @@ class TeethSegmentationDataset(Dataset):
         return vertices, labels
 
 # Usage of the dataset
-def get_data_loaders(root_dir, batch_size=4, test_ids_file='private-testing-set.txt'):
+def get_data_loaders(args):
     # Create training and testing datasets
-    train_dataset = TeethSegmentationDataset(root_dir=root_dir, split='train', test_ids_file=test_ids_file)
-    test_dataset = TeethSegmentationDataset(root_dir=root_dir, split='test', test_ids_file=test_ids_file)
+    train_dataset = TeethSegmentationDataset(root_dir=args.path, split='train', test_ids_file=args.test_ids, p=args.p)
+    test_dataset = TeethSegmentationDataset(root_dir=args.path, split='test', test_ids_file=args.test_ids, p=args.p)
 
     # Create DataLoader for both
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
 
     return train_loader, test_loader
