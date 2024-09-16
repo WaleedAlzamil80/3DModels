@@ -5,6 +5,8 @@ import argparse
 from Dataset.segmentation_OSF.Dataset import get_data_loaders 
 from models.PointNet import PointNet
 from train import train
+from vis.plots import plot_training_data
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Model training parameters")
 
@@ -12,6 +14,8 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=1, help="Batch size")
     parser.add_argument('--num_workers', type=int, default=4, help="Number of Workers")
     parser.add_argument('--path', type=str, default="dataset", help="Path of the dataset")
+    parser.add_argument('--output', type=str, default="output", help="Output path")
+
     parser.add_argument('--test_ids', type=str, default="dataset/test", help="Path of the ids dataset for testing")
 
     parser.add_argument('--k', type=int, default=33, help="Number classes")
@@ -24,10 +28,12 @@ args = parse_args()
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
-device = "cpu"
 
 train_loader, test_loader = get_data_loaders(args.path, args.batch_size, args.test_ids)
 model = PointNet(mode = args.mode, k = args.k).to(device)
-# model = nn.DataParallel(model).to(device)
+model = nn.DataParallel(model).to(device)
 
-train(model, train_loader, test_loader, args)
+train_accuracy, test_accuracy, train_loss, test_loss = train(model, train_loader, test_loader, args)
+
+# Save the plots
+plot_training_data(train_accuracy, test_accuracy, train_loss, test_loss, args.output)

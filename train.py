@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from losses.PointNetLosses import tnet_regularization
@@ -6,7 +7,6 @@ from sklearn.metrics import accuracy_score
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
-device = 'cpu'
 
 def train(model, train_loader, test_loader, args):
 
@@ -87,9 +87,12 @@ def train(model, train_loader, test_loader, args):
         test_accuracy.append(test_epoch_accuracy)
         test_loss.append(t_loss)
 
-        # torch.save(model.state_dict(), f"model_epoch_{epoch}.pth") # /home/waleed/Documents/3DLearning/3Dmodels/results/
 
         print(f'Epoch [{epoch + 1}/{args.num_epochs}], train_Loss: {cum_loss:.4f}, Accuracy: {train_epoch_accuracy:.4f}')
         print(f'Epoch [{epoch + 1}/{args.num_epochs}], test_Loss: {t_loss:.4f}, Accuracy: {test_epoch_accuracy:.4f}')
         print("----------------------------------------------------------------------------------------------")
     print('Training finished.')
+
+    torch.save(model.state_dict(), os.path.join(args.output, f"model_epoch_{epoch}.pth"))
+
+    return train_accuracy, test_accuracy, train_loss, test_loss
