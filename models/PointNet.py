@@ -30,9 +30,7 @@ class TNetkd(nn.Module):
         x = self.relu(self.bn5(self.fc2(x.transpose(1, 2)).transpose(1, 2)))                # (1, #pointClouds, 256)
         x = self.fc3(x.transpose(1, 2))                                                     # (1, #pointClouds, k * k)
         x = torch.max(x, dim=1, keepdim=False)[0]                                            # (1, k * k)
-        iden = torch.eye(self.k, requires_grad=True).view(1, self.k * self.k).expand(bs, -1)
-        if x.is_cuda:
-            iden = iden.cuda()
+        iden = torch.eye(self.k, requires_grad=True).view(1, self.k * self.k).expand(bs, -1).to(x.device)
         x = x + iden
         x = x.reshape(bs, self.k, self.k)                                                   # (1, k, k)
         return x
@@ -143,7 +141,7 @@ class PointNet(nn.Module):
             self.PointNet = PointNetGfeat(k)
 
     def forward(self, x):
-        return self.PointNet(x)
+        return self.PointNet(x.transpose(1, 2))
 
 class PointNetPartSeg(nn.Module):
     def __init__(self, k=33):

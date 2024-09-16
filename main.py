@@ -7,11 +7,16 @@ from models.PointNet import PointNet
 from train import train
 def parse_args():
     parser = argparse.ArgumentParser(description="Model training parameters")
-    
-    parser.add_argument('--num_epochsbatch_size', type=int, default=10, help="Number of epochs")
+
+    parser.add_argument('--num_epochs', type=int, default=10, help="Number of epochs")
     parser.add_argument('--batch_size', type=int, default=1, help="Batch size")
     parser.add_argument('--num_workers', type=int, default=4, help="Number of Workers")
     parser.add_argument('--path', type=str, default="dataset", help="Path of the dataset")
+    parser.add_argument('--test_ids', type=str, default="dataset/test", help="Path of the ids dataset for testing")
+
+    parser.add_argument('--k', type=int, default=33, help="Number classes")
+    parser.add_argument('--mode', type=str, default="segmentation", help="Problems ex:- segmentaion, classification")
+    parser.add_argument('--lr', type=float, default=0.001, help="Learning Rate")
 
     return parser.parse_args()
 
@@ -19,9 +24,10 @@ args = parse_args()
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
+device = "cpu"
 
-train_loader, test_loader = get_data_loaders(args.path, args.batch_size)
-model = PointNet(mode = "segmentation", k = 33).to(device)
-model = nn.DataParallel(model).to(device)
+train_loader, test_loader = get_data_loaders(args.path, args.batch_size, args.test_ids)
+model = PointNet(mode = args.mode, k = args.k).to(device)
+# model = nn.DataParallel(model).to(device)
 
 train(model, train_loader, test_loader, args)

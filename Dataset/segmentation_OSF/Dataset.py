@@ -5,7 +5,7 @@ import numpy as np
 import trimesh
 
 class TeethSegmentationDataset(Dataset):
-    def __init__(self, root_dir, split='train', test_ids_file='private-testing-set.txt', transform=None):
+    def __init__(self, root_dir, split='train', test_ids_file='private-testing-set/private-testing-set.txt', transform=None):
         """
         Args:
             root_dir (string): Directory with all the parts (data_part_{1-6}).
@@ -47,7 +47,7 @@ class TeethSegmentationDataset(Dataset):
     def _load_obj_file(self, obj_path):
         """Load .obj file and return vertices and faces."""
         mesh_data = trimesh.load(obj_path)
-        vertices = mesh_data.vertices
+        vertices = mesh_data.vertices.astype(np.float32)
         # faces = mesh_data.faces
         return vertices
 
@@ -55,7 +55,7 @@ class TeethSegmentationDataset(Dataset):
         """Load labels from the JSON file."""
         with open(label_path, 'r') as f:
             labels = json.load(f)
-        return np.array(labels['labels'])
+        return np.maximum(0, np.array(labels['labels']) - 10 - 2 * ((np.array(labels['labels']) // 10) - 1))
 
     def __getitem__(self, idx):
         obj_path, label_path = self.data_list[idx]
