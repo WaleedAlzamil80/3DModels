@@ -79,7 +79,7 @@ def get_data_loaders(args):
     test_dataset = TeethSegmentationDataset(root_dir=args.path, split='test', test_ids_file=args.test_ids, p=args.p)
 
     # Create DataLoader for both
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
     return train_loader, test_loader

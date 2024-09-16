@@ -68,8 +68,8 @@ def train(model, train_loader, test_loader, args):
 
                 # Forward pass
                 outputs, tin, tfe = model(vertices)
-                t_loss += criterion(outputs, labels).item() + tnet_regularization(tin).item() + 0.001 * tnet_regularization(tfe).item()
                 outputs = outputs.view(-1, args.k)
+                t_loss += criterion(outputs, labels).item() + tnet_regularization(tin).item() + 0.001 * tnet_regularization(tfe).item()
 
                 # Get predictions and true labels
                 _, preds = torch.max(outputs, 1)
