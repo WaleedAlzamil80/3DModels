@@ -2,52 +2,46 @@ import torch
 from torch import nn
 import numpy as np
 
-# the input shape should be (Batch_Size, In_channels, Sequence_Length)
+# the input shape should be (Batch_Size, In_channels, Centroids, Samples)
 
 class TNetkd(nn.Module):
-    def __init__(self, k = 3):
+    def __init__(self, k = 3, mlp= [64, 128, 1024, 512, 256]):
         super(TNetkd, self).__init__()
         self.k=k
-        self.conv1 = nn.Conv1d(in_channels=self.k, out_channels=64, kernel_size=1)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=1)
-        self.conv3 = nn.Conv1d(in_channels=128, out_channels=1024, kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=self.k, out_channels=mlp[0], kernel_size=1)
+        self.conv2 = nn.Conv2d(in_channels=mlp[0], out_channels=mlp[1], kernel_size=1)
+        self.conv3 = nn.Conv2d(in_channels=mlp[1], out_channels=mlp[2], kernel_size=1)
 
-        self.conv4 = nn.Conv1d(in_channels=1024, out_channels=512, kernel_size=1)
-        self.conv5 = nn.Conv1d(in_channels=512, out_channels=256, kernel_size=1)
-        self.conv6 = nn.Conv1d(in_channels=256, out_channels=self.k*self.k, kernel_size=1)
+        self.conv4 = nn.Conv2d(in_channels=mlp[2], out_channels=mlp[3], kernel_size=1)
+        self.conv5 = nn.Conv2d(in_channels=mlp[3], out_channels=mlp[4], kernel_size=1)
+        self.conv6 = nn.Conv2d(in_channels=mlp[4], out_channels=self.k*self.k, kernel_size=1)
 
-        # self.fc1 = nn.Linear(in_features=1024, out_features=512)
-        # self.fc2 = nn.Linear(in_features=512, out_features=256)
-        # self.fc3 = nn.Linear(in_features=256, out_features=self.k*self.k)
-
-        self.bn1 = nn.BatchNorm1d(num_features=64)
-        self.bn2 = nn.BatchNorm1d(num_features=128)
-        self.bn3 = nn.BatchNorm1d(num_features=1024)
-        self.bn4 = nn.BatchNorm1d(num_features=512)
-        self.bn5 = nn.BatchNorm1d(num_features=256)
+        self.bn1 = nn.BatchNorm2d(num_features=mlp[0])
+        self.bn2 = nn.BatchNorm2d(num_features=mlp[1])
+        self.bn3 = nn.BatchNorm2d(num_features=mlp[2])
+        self.bn4 = nn.BatchNorm2d(num_features=mlp[3])
+        self.bn5 = nn.BatchNorm2d(num_features=mlp[4])
         self.relu = nn.ReLU()
 
-    def forward(self, x):                                                                   # x.shape = # (1, k, #pointClouds)
-        bs, _, n = x.shape
+    def forward(self, x):
+        bs, _, c, n = x.shape
         x = self.relu(self.bn1(self.conv1(x)))                                          
         x = self.relu(self.bn2(self.conv2(x)))                                          
-        x = self.relu(self.bn3(self.conv3(x)))                                                # (1, 1024, #pointClouds)
-        # both do exactly the same thing
-        # x = self.relu(self.bn4(self.fc1(x.transpose(1, 2)).transpose(1, 2)))                # (1, #pointClouds, 512)
-        # x = self.relu(self.bn5(self.fc2(x.transpose(1, 2)).transpose(1, 2)))                # (1, #pointClouds, 256)
-        # x = self.fc3(x.transpose(1, 2))                                                     # (1, #pointClouds, k * k)  max with dim = 1
-        x = self.relu(self.bn4(self.conv4(x)))                                                # (1, 512, #pointClouds)
-        x = self.relu(self.bn5(self.conv5(x)))                                                # (1, 256, #pointClouds)
-        x = self.conv6(x)                                                                     # (1, k * k,#pointClouds)   max with dim = 2
+        x = self.relu(self.bn3(self.conv3(x)))                                                
+        x = self.relu(self.bn4(self.conv4(x)))                                                
+        x = self.relu(self.bn5(self.conv5(x)))                                                
+        x = self.conv6(x)                                                                     
 
-        x = torch.max(x, dim=2, keepdim=False)[0]                                            # (1, k * k)
+        x = torch.max(x, dim=3, keepdim=False)[0]                                            # (1, k * k, C)
+        x = torch.max(x, dim=2, keepdim=False)[0]                                            # (1, k * k, C)
+
         iden = torch.eye(self.k, requires_grad=True).view(1, self.k * self.k).expand(bs, -1).to(x.device)
         x = x + iden
         x = x.view(bs, self.k, self.k)                                                   # (1, k, k)
         return x
 
 class PointNetGfeat(nn.Module):
-    def __init__(self, k = 3, global_features = True):
+    def __init__(self, k = 3, mlp = [64, 64, 64, 128, 1024], global_features = True):
         super(PointNetGfeat, self).__init__()
         self.k = k
         self.global_features = global_features

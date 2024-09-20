@@ -1,3 +1,4 @@
+
 # 3D Models Repository
 
 The goal is to create a collection of different 3D models and pipelines that can be applied to similar tasks involving 3D point cloud data, meshes, or volumetric data.
@@ -38,10 +39,20 @@ The repository is structured to allow easy integration of additional methods and
     - `train.py`: Training script for the PointNet model.
     - `test_PointNet.py`: Testing and evaluation script for PointNet.
     - `losses/PointNetLosses.py`: Custom loss functions for PointNet.
+  - [Architecture](images/PointNet.png)
+
+- **PointNet++**:
+  - **Description**: PointNet++ builds on PointNet by incorporating hierarchical learning, capturing local structures at various scales. It's more suited for complex 3D tasks like segmentation and dense prediction.
+  - **Files**:
+      - `models/PointNetPP.py`: Contains the implementation of the PointNet++ architecture.
+      - `train.py`: Training script for the PointNet++ model (same script as in PointNet).
+      - `test_PointNetPP.py`: Testing and evaluation script for PointNet++.
+      - `losses/PointNetLosses.py`: Losses the same as PointNet.
+  - [Architecture](images/PointNetpp.png)
 
 ## Upcoming Features
 
-- **Add more 3D models**: Future implementations may include architectures like PointNet++, DGCNN, and 3D CNNs for point cloud and mesh data.
+- **Add more 3D models**: Future implementations may include architectures like DGCNN, and 3D CNNs for point cloud and mesh data.
 - **Improve segmentation results**: Fine-tune the models to enhance segmentation performance on the teeth dataset and Shapenet.
 - **Expand dataset**: Experiment with other 3D datasets and tasks.
 
@@ -64,7 +75,7 @@ To set up the environment and install all the required dependencies, you can use
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/3DModels.git
+git clone https://github.com/WaleedALzamil80/3DModels.git
 cd 3DModels
 ```
 
@@ -118,7 +129,7 @@ You can customize the training configuration by modifying the arguments like dat
 ├── README.md                  # Project documentation
 ├── requirements.txt           # Python dependencies
 ├── test_PointNet.py           # Testing script for PointNet
-└── train.py                   # Training script for PointNet
+└── train.py                   # Training script
 ```
 
 ## Contributing

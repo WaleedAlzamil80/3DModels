@@ -13,7 +13,7 @@ path = "/home/waleed/Documents/CROWNGENERATION/datasets/osfstorage-archive/all_d
 mesh = trimesh.load(path)
 
 # Convert to PyTorch tensors
-vertices_tensor = torch.tensor(mesh.vertices, dtype=torch.float32).unsqueeze(0).transpose(1, 2)
+vertices_tensor = torch.tensor(mesh.vertices, dtype=torch.float32).unsqueeze(0)
 
 print("Ready: ", vertices_tensor.shape)
 # Check if faces exist and convert them too
