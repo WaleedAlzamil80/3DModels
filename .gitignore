@@ -17,3 +17,4 @@ dist/
 utils/others
 Dataset/shapenetcore
 Dataset/3Dmatch
+ModelNet10/

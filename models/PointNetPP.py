@@ -4,7 +4,6 @@ import numpy as np
 
 from models.PointNetpp.FPS import FPS
 from models.PointNetpp.Grouping import Grouping, index_point
-from vis.visulizeGrouped import visualize_with_trimesh
 
 cuda = True if torch.cuda.is_available() else False
 device = "cuda" if cuda else "cpu"
