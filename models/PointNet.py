@@ -140,7 +140,7 @@ class PointNetSeg(nn.Module):
         x = self.relu(self.bn1(self.conv1(x)))
         x = self.relu(self.bn2(self.conv2(x)))
         x = self.relu(self.bn3(self.conv3(x)))
-        x = self.logsoftmax(self.conv4(x))
+        x = self.logsoftmax(self.conv4(x)).transpose(1, 2)
         return x, inTra, feTra
 
 class PointNet(nn.Module):

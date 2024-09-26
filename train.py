@@ -24,13 +24,13 @@ def train(model, train_loader, test_loader, args):
         train_preds = []
 
         for vertices, labels in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
-            vertices, labels = vertices.to(device), labels.to(device).view(-1)
+            vertices, labels = vertices.to(device), labels.to(device)
 
             # Forward pass
             outputs, tin, tfe = model(vertices)
             rtin, rtfe = tnet_regularization(tin), tnet_regularization(tfe)
-            outputs = outputs.view(-1, args.k)
-            loss = criterion(outputs, labels) + rtin + 0.001 * rtfe
+
+            loss = criterion(outputs.reshape(-1, args.k), labels.reshape(-1)) + rtin + 0.001 * rtfe
             cum_loss += loss.item() + rtin + 0.001 * rtfe
 
             # Zero the parameter gradients

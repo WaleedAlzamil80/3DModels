@@ -45,11 +45,13 @@ def Grouping(x, points, centroids, nsamples, radius):
     grouped_x = index_point(x, idx)
     grouped_points = index_point(points, idx)
     labels = torch.argmin(distance, dim=1)
+    # grouped_labels = labels[idx]
+
     # print(grouped_points.shape, labels.shape)
     # for i in range(x.shape[0]):
     #     visualize_with_trimesh(x[i].reshape(-1, 3), labels[i].reshape(-1))
     #     # print(grouped_x[i].reshape(-1, 3).shape, labels[i][:grouped_x[i].reshape(-1, 3).shape[0]].shape)
     #     # print(grouped_x[i].reshape(-1, 3).shape)
     #     # visualize_with_trimesh(grouped_x[i].reshape(-1, 3), labels[i][:grouped_x[i].reshape(-1, 3).shape[0]])
-    
+
     return grouped_x, grouped_points, labels, idx

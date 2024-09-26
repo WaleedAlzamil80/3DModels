@@ -9,6 +9,8 @@ venv/
 build/
 dist/
 *.egg-info/
+test_align.py
+Dataset/download.sh
 
 /dataset
 # Logs and temp files
