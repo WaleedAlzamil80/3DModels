@@ -3,10 +3,12 @@ import torch.nn as nn
 import numpy as np
 import trimesh
 import trimesh.schemas
-from models.PointNetPP import PointNetpp
+from models.PointNetpp.PointNetPP import PointNetpp
 
-from models.PointNetpp.FPS import FPS
-from models.PointNetpp.Grouping import Grouping, index_point
+from sampling.PointsCloud.FPS import FPS
+from sampling.PointsCloud.Grouping import Grouping, index_point
+from sampling.PointsCloud.voxelization import voxel_grid_downsampling, downsample_to_fixed_vertices
+
 from losses.PointNetLosses import tnet_regularization
 from utils.helpful import print_trainable_parameters
 from vis.visulizeGrouped import visualize_with_trimesh
@@ -45,32 +47,78 @@ z_axis_path.colors = [[0, 0, 255, 255]]  # Blue for Z
 scene = trimesh.Scene([mesh, x_axis_path, y_axis_path, z_axis_path])
 
 # Visualize the mesh with the axes
-scene.show()
+# scene.show()
 
 # mesh1.show()
 # vertices_tensor = torch.tensor(mesh1.vertices, dtype=torch.float32).unsqueeze(0)
 
 # Convert to PyTorch tensors
 vertices_tensor = torch.tensor(mesh1.vertices, dtype=torch.float32).unsqueeze(0)
+
 # vertices_tensor2 = torch.tensor(mesh2.vertices, dtype=torch.float32)[:4096*20, :].unsqueeze(0) # .to('cuda')
-
-# vertices_tensor = torch.cat([vertices_tensor1, vertices_tensor2], dim = 0)
-num_centroids = 2048
-num_samples = 32
-
-centroids_idx = FPS(vertices_tensor, num_centroids)
-
-centroids = index_point(vertices_tensor, centroids_idx)
-
-x_points, g_points, labels, idx = Grouping(vertices_tensor, vertices_tensor, centroids, num_samples, 0.5)
-
-ss = x_points.reshape(-1, 3)
-visualize_with_trimesh(ss, labels.squeeze(0)[:ss.shape[0]])
+# 
+# # vertices_tensor = torch.cat([vertices_tensor1, vertices_tensor2], dim = 0)
+# num_centroids = 2048
+# num_samples = 32
+# 
+# centroids_idx = FPS(vertices_tensor, num_centroids)
+# 
+# centroids = index_point(vertices_tensor, centroids_idx)
+# 
+# x_points, g_points, labels, idx = Grouping(vertices_tensor, vertices_tensor, centroids, num_samples, 0.5)
+# 
+# ss = x_points.reshape(-1, 3)
+# visualize_with_trimesh(ss, labels.squeeze(0)[:ss.shape[0]])
  
-# Check if faces exist and convert them too
-faces_tensor = torch.tensor(mesh1.faces, dtype=torch.long) if mesh1.faces is not None else None
+# # Check if faces exist and convert them too
+# faces_tensor = torch.tensor(mesh1.faces, dtype=torch.long) if mesh1.faces is not None else None
+# 
+# model = PointNetpp(k=3)
+# print_trainable_parameters(model)
+# x = model(vertices_tensor)
+# print(x.shape)
 
-model = PointNetpp(k=3)
-print_trainable_parameters(model)
-x = model(vertices_tensor)
-print(x.shape)
+
+
+# Assuming voxel_grid_downsampling is implemented
+voxel_size = 1.0  # Define the voxel size for downsampling (adjust based on your mesh resolution)
+
+# Apply voxel grid downsampling to the vertices tensor
+downsampled_vertices = voxel_grid_downsampling(vertices_tensor.squeeze(0).numpy(), voxel_size)
+
+# Convert the downsampled points back to a PyTorch tensor if needed
+downsampled_vertices_tensor = torch.tensor(downsampled_vertices, dtype=torch.float32).unsqueeze(0)
+
+# Print the number of points before and after downsampling
+print(f"Original number of points: {vertices_tensor.shape[1]}")
+print(f"Downsampled number of points: {downsampled_vertices_tensor.shape[1]}")
+
+scene_downsampled = trimesh.Scene([vertices_tensor, x_axis_path, y_axis_path, z_axis_path])
+
+# Show the scene with downsampled points
+scene_downsampled.show()
+
+
+# Visualize the downsampled points using trimesh
+downsampled_mesh = trimesh.PointCloud(downsampled_vertices)
+scene_downsampled = trimesh.Scene([downsampled_mesh, x_axis_path, y_axis_path, z_axis_path])
+
+# Show the scene with downsampled points
+scene_downsampled.show()
+
+
+# Example usage
+num_target_points = 2**14
+downsampled_vertices = downsample_to_fixed_vertices(vertices_tensor.squeeze(0).numpy(), num_target_points)
+
+# Convert back to PyTorch tensor if needed
+downsampled_vertices_tensor = torch.tensor(downsampled_vertices, dtype=torch.float32).unsqueeze(0)
+
+# Print the number of points before and after
+print(f"Original number of points: {vertices_tensor.shape[1]}")
+print(f"Downsampled number of points: {downsampled_vertices_tensor.shape[1]}")
+
+# Visualization (optional)
+downsampled_mesh = trimesh.PointCloud(downsampled_vertices)
+scene_downsampled = trimesh.Scene([downsampled_mesh, x_axis_path, y_axis_path, z_axis_path])
+scene_downsampled.show()

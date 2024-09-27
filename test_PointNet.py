@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import trimesh
-from models.PointNet import PointNet
+from models.PointNetpp.PointNet import PointNet
 from losses.PointNetLosses import tnet_regularization
 from utils.helpful import print_trainable_parameters
 import matplotlib.pyplot as plt

@@ -2,8 +2,8 @@ import torch
 from torch import nn
 import numpy as np
 
-from models.PointNetpp.FPS import FPS
-from models.PointNetpp.Grouping import Grouping, index_point
+from sampling.PointsCloud.FPS import FPS
+from sampling.PointsCloud.Grouping import Grouping, index_point
 
 cuda = True if torch.cuda.is_available() else False
 device = "cuda" if cuda else "cpu"

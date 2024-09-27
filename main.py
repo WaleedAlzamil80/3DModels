@@ -4,8 +4,8 @@ import argparse
 
 from Dataset.segmentation_OSF.Dataset import get_data_loaders
 from Dataset.modelnet.Dataloader import ModelNet10Dataset
-from models.PointNet import PointNet
-from models.PointNetPP import PointNetpp
+from models.PointNetpp.PointNet import PointNet
+from models.PointNetpp.PointNetPP import PointNetpp
 from train import train
 from vis.plots import plot_training_data
 
