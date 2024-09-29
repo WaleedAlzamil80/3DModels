@@ -5,8 +5,8 @@ import json
 import numpy as np
 import trimesh
 
-from models.PointNetpp.FPS import FPS
-from models.PointNetpp.Grouping import Grouping, index_point
+from ...sampling.PointsCloud.FPS import FPS
+from ...sampling.PointsCloud.Grouping import Grouping, index_point
 
 class TeethSegmentationDataset(Dataset):
     def __init__(self, root_dir, split='train', n_centroids=2048, nsamples=32, radius=0.01, test_ids_file='private-testing-set/private-testing-set.txt', transform=None, p=7):

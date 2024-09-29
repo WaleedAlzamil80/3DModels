@@ -20,3 +20,5 @@ utils/others
 Dataset/shapenetcore
 Dataset/3Dmatch
 ModelNet10/
+test_PointNet.py
+test_PointNetpp.py
