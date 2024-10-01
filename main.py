@@ -1,51 +1,28 @@
 import torch
 import torch.nn as nn
-import argparse
 
-from Dataset.segmentation_OSF.Dataset import get_data_loaders
-from Dataset.modelnet.Dataloader import ModelNet10Dataset
-from models.PointNetpp.PointNet import PointNet
-from models.PointNetpp.PointNetPP import PointNetpp
+from factories.dataset_factory import get_dataset_loader
+from factories.model_factory import get_model
 from train import train
+
 from vis.plots import plot_training_data
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Model training parameters")
-
-    parser.add_argument('--num_epochs', type=int, default=10, help="Number of epochs")
-    parser.add_argument('--batch_size', type=int, default=1, help="Batch size")
-    parser.add_argument('--num_workers', type=int, default=4, help="Number of Workers")
-    parser.add_argument('--n_centroids', type=int, default=2048, help="centroids")
-    parser.add_argument('--nsamples', type=int, default=16, help="sample points")
-    parser.add_argument('--path', type=str, default="dataset", help="Path of the dataset")
-    parser.add_argument('--Dataset', type=str, default="OSF", help="Which Dataset?")
-
-    parser.add_argument('--output', type=str, default="output", help="Output path")
-
-    parser.add_argument('--test_ids', type=str, default="private-testing-set.txt", help="Path of the ids dataset for testing")
-    parser.add_argument('--p', type=int, default=3, help="data parts")
-
-    parser.add_argument('--k', type=int, default=33, help="Number classes")
-    parser.add_argument('--model', type=str, default="PointNet", help="Select the model")
-    parser.add_argument('--mode', type=str, default="segmentation", help="Problems ex:- segmentaion, classification")
-    parser.add_argument('--lr', type=float, default=0.001, help="Learning Rate")
-
-    return parser.parse_args()
+from config.args_config import parse_args
 
 args = parse_args()
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
 
-train_loader, test_loader = get_data_loaders(args)
+# Use the factory to dynamically get the dataloaders for specific dataset
+train_loader, test_loader = get_dataset_loader(args.Dataset, args)
 
-if args.model == "PointNet":
-    model = PointNet(mode = args.mode, k = args.k).to(device)
-elif args.model == "PointNet++":
-    model = PointNetpp(mode = args.mode, k = args.k).to(device)
+# Use the factory to dynamically get the model
+model = get_model(args.model, mode=args.mode, k=args.k).to(device)
 
+# Wrap the model in DataParallel for multi-GPU training
 model = nn.DataParallel(model).to(device)
 
+# Train the model
 train_accuracy, test_accuracy, train_loss, test_loss = train(model, train_loader, test_loader, args)
 
 # Save the plots

@@ -1,3 +1,5 @@
+import numpy as np
+
 dental_to_class = {
     0: 0,
     11: 1,
@@ -33,7 +35,6 @@ dental_to_class = {
     47: 31,
     48: 32
 }
-import numpy as np
 
 labels = np.array([0,
 11,
@@ -68,6 +69,8 @@ labels = np.array([0,
 46,
 47,
 48])
+
 class_label = np.maximum(0, labels - 10 - 2 * ((labels // 10) - 1))
+
 print(labels)
 print(class_label)

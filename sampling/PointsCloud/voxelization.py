@@ -1,8 +1,8 @@
 import torch
 import open3d as o3d
 import numpy as np
-from FPS import FPS
-from Grouping import Grouping, index_point
+from .FPS import FPS
+from .Grouping import Grouping, index_point
 
 def voxel_grid_downsampling(point_cloud, voxel_size):
     pcd = o3d.geometry.PointCloud()
@@ -13,7 +13,7 @@ def voxel_grid_downsampling(point_cloud, voxel_size):
 def downsample_to_fixed_vertices(vertices, num_target_points, initial_downsampling=True, voxel_size=0.01):
     """
     Downsample point cloud to a fixed number of vertices.
-    
+
     Parameters:
     - vertices: (N, 3) array of input points.
     - num_target_points: Number of points desired after downsampling.

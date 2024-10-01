@@ -5,11 +5,10 @@ import json
 import numpy as np
 import trimesh
 
-from ...sampling.PointsCloud.FPS import FPS
-from ...sampling.PointsCloud.Grouping import Grouping, index_point
+from factories.sampling_factory import get_sampling_technique
 
 class TeethSegmentationDataset(Dataset):
-    def __init__(self, root_dir, split='train', n_centroids=2048, nsamples=32, radius=0.01, test_ids_file='private-testing-set/private-testing-set.txt', transform=None, p=7):
+    def __init__(self, root_dir, split='train', n_centroids=2048, nsamples=32, radius=0.01, test_ids_file='private-testing-set/private-testing-set.txt', transform=None, p=7, sampling='fbs'):
         """
         Args:
             root_dir (string): Directory with all the parts (data_part_{1-6}).
@@ -24,6 +23,7 @@ class TeethSegmentationDataset(Dataset):
         self.n_centroids=n_centroids
         self.nsamples=nsamples
         self.radius=radius
+        self.sampling_fn = get_sampling_technique(sampling)
         self.test_ids = self._load_test_ids(test_ids_file)
         self.data_list = self._prepare_data_list()
 
@@ -58,13 +58,7 @@ class TeethSegmentationDataset(Dataset):
         # vertices = mesh_data.vertices.astype(np.float32)
         vertices = torch.tensor(mesh_data.vertices, dtype=torch.float32).unsqueeze(0)
         # faces = mesh_data.faces
-        return self._sampling(vertices)
-
-    def _sampling(self, x):
-        centroids_idx = FPS(x, self.n_centroids)
-        centroids = index_point(x, centroids_idx)
-        x_points, g_points, labels, idx = Grouping(x, x, centroids, self.nsamples, self.radius)
-        return x_points.squeeze(0), idx
+        return self.sampling_fn(vertices, self.n_centroids, self.nsamples)
 
     def _load_labels(self, label_path):
         """Load labels from the JSON file."""
@@ -76,24 +70,16 @@ class TeethSegmentationDataset(Dataset):
     def __getitem__(self, idx):
         obj_path, label_path = self.data_list[idx]
 
-        # Load data
         vertices, idx = self._load_obj_file(obj_path)
         labels = self._load_labels(label_path)
-
-        # labels = index_point(labels, idx)
-
-        # sample = {'vertices': vertices, 'labels': labels}
-
-        # if self.transform:
-        #    sample = self.transform(sample)
 
         return vertices.view(-1, 3), labels[idx].view(-1)
 
 # Usage of the dataset
-def get_data_loaders(args):
+def OSF_data_loaders(args):
     # Create training and testing datasets
-    train_dataset = TeethSegmentationDataset(root_dir=args.path, split='train', n_centroids=args.n_centroids, nsamples=args.nsamples, test_ids_file=args.test_ids, p=args.p)
-    test_dataset = TeethSegmentationDataset(root_dir=args.path, split='test', n_centroids=args.n_centroids, nsamples=args.nsamples, test_ids_file=args.test_ids, p=args.p)
+    train_dataset = TeethSegmentationDataset(root_dir=args.path, split='train', n_centroids=args.n_centroids, nsamples=args.nsamples, test_ids_file=args.test_ids, p=args.p, sampling=args.sampling)
+    test_dataset = TeethSegmentationDataset(root_dir=args.path, split='test', n_centroids=args.n_centroids, nsamples=args.nsamples, test_ids_file=args.test_ids, p=args.p, sampling=args.sampling)
 
     # Create DataLoader for both
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
