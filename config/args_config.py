@@ -10,6 +10,7 @@ def parse_args():
 
     parser.add_argument('--n_centroids', type=int, default=2048, help="centroids")
     parser.add_argument('--nsamples', type=int, default=16, help="sample points")
+    parser.add_argument('--radius', type=float, default=0.1, help="radius of ball query")
 
     parser.add_argument('--path', type=str, default="dataset", help="Path of the dataset")
     parser.add_argument('--Dataset', type=str, default="OSF", help="Which Dataset?")

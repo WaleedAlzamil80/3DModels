@@ -3,7 +3,6 @@ from torch import nn
 import numpy as np
 
 # the input shape should be (Batch_Size, In_channels, Sequence_Length)
-
 class TNetkd(nn.Module):
     def __init__(self, k = 3):
         super(TNetkd, self).__init__()
@@ -143,19 +142,34 @@ class PointNetSeg(nn.Module):
         x = self.logsoftmax(self.conv4(x)).transpose(1, 2)
         return x, inTra, feTra
 
+# Mode Factory that maps modes to classes
+MODE_FACTORY = {
+    "classification": PointNetCls,
+    "segmentation": PointNetSeg,
+    "features": PointNetGfeat,
+}
+
+def get_pointnet_mode(mode, *args, **kwargs):
+    """Fetch the appropriate PointNet model based on the mode."""
+    if mode not in MODE_FACTORY:
+        raise ValueError(f"Mode {mode} is not available.")
+    return MODE_FACTORY[mode](*args, **kwargs)
+
+
 class PointNet(nn.Module):
     def __init__(self, mode = "classification", k=28, input=3):
         super(PointNet, self).__init__()
-        self.k = k
-        self.input = input
-        if mode == "classification":
-            self.PointNet = PointNetCls(k, self.input)
-        elif mode == "segmentation":
-            self.PointNet = PointNetSeg(k, self.input)
-        elif mode == "features":
-            self.PointNet = PointNetGfeat(k, self.input)
+        self.PointNet = get_pointnet_mode(mode, k, input)
 
     def forward(self, x):
+        # If input is (Batch_size, #channels, #points), we need to reshape it to (Batch_size, #channels, 1, #points)
+        if len(x.shape) == 3:
+            bs, channels, points = x.shape
+            # x = x.unsqueeze(2)  # Add a new dimension to match Conv2d input format: (Batch_size, #channels, 1, #points)
+        elif len(x.shape) == 4:
+            bs, channels, centroids, points = x.shape
+            # No need to change if it's already 4D
+
         return self.PointNet(x.transpose(1, 2))
 
 class PointNetPartSeg(nn.Module):

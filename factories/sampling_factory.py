@@ -2,7 +2,7 @@ from sampling.PointsCloud.fps_grouping import fbsGrouping
 from sampling.PointsCloud.voxelization import downsample_to_fixed_vertices, voxel_grid_downsampling
 
 
-# Factory to choose the sampling technique
+# Factory to choose the sampling technique use args
 SAMPLING_FACTORY = {
     'fps': fbsGrouping,
     'vox': voxel_grid_downsampling,

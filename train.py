@@ -4,6 +4,7 @@ import torch.nn as nn
 from losses.PointNetLosses import tnet_regularization
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
+from utils.helpful import print_trainable_parameters
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
@@ -12,8 +13,10 @@ def train(model, train_loader, test_loader, args):
 
     train_accuracy = []
     train_loss = []
-    test_accuracy = [] 
+    test_accuracy = []
     test_loss = []
+
+    print_trainable_parameters(model)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), args.lr)
@@ -24,12 +27,13 @@ def train(model, train_loader, test_loader, args):
         train_preds = []
 
         for vertices, labels in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
+
             vertices, labels = vertices.to(device), labels.to(device)
 
             # Forward pass
             outputs, tin, tfe = model(vertices)
-            rtin, rtfe = tnet_regularization(tin), tnet_regularization(tfe)
 
+            rtin, rtfe = tnet_regularization(tin), tnet_regularization(tfe)
             loss = criterion(outputs.reshape(-1, args.k), labels.reshape(-1)) + rtin + 0.001 * rtfe
             cum_loss += loss.item() + rtin + 0.001 * rtfe
 

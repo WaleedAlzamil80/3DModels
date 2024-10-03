@@ -1,4 +1,4 @@
-from models.PointNetpp.PointNet import PointNet
+from models.PointNetpp.PointNet2d import PointNet
 from models.PointNetpp.PointNetPP import PointNetpp
 
 # Dictionary that maps model names to model classes

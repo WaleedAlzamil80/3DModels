@@ -1,11 +1,10 @@
 from Dataset.segmentation_OSF.Dataset import OSF_data_loaders
-from Dataset.modelnet.Dataloader import ModelNet10Dataset
+from Dataset.modelnet.Dataloader import modelnet_data_loaders
 
 # Factory to choose the dataset
 DATASET_FACTORY = {
-    'modelnet10': ModelNet10Dataset,
+    'modelnet': modelnet_data_loaders,
     'OSF': OSF_data_loaders,
-    # You can add more datasets here
 }
 
 def get_dataset_loader(dataset_name, args):

@@ -2,53 +2,122 @@ import torch
 from torch import nn
 import numpy as np
 
-from sampling.PointsCloud.FPS import FPS
-from sampling.PointsCloud.Grouping import Grouping, index_point
+from models.PointNetpp.PointNet2d import PointNet 
+from sampling.PointsCloud.fps_grouping import fbsGrouping
+import argparse
 
 cuda = True if torch.cuda.is_available() else False
 device = "cuda" if cuda else "cpu"
 
 class SetApstractionLayer(nn.Module):
-    def __init__(self, n_centroids, nsamples, radius, in_channels, mlp):
+    '''
+    inputs: 
+            features: (Tensor) (batch_size, points, feature_maps)
+            coordinates: (Tensor) (batch_size, points, coordinates)
+
+    PointNet Input:
+            features: (Tensor) (batch_size, feature_maps, num_centroids, num_samples)
+
+    outputs:
+            features: (Tensor) (batch_size, feature_maps, num_centroids, num_samples)
+            coordinates: (Tensor) (batch_size, coordinates, num_centroids, num_samples)
+            centroids: (Tensor) (batch_size, num_centroids, coordinates)
+    '''
+
+    def __init__(self, n_centroids, nsamples, radius, in_channels):
         super(SetApstractionLayer, self).__init__()
         self.n_centroids, self.nsamples, self.radius = n_centroids, nsamples, radius
-
-        self.conv1 = nn.Conv2d(in_channels, mlp[0], kernel_size=1)
-        self.conv2 = nn.Conv2d(mlp[0], mlp[1], kernel_size=1)
-        self.bn1 = nn.BatchNorm2d(mlp[0])
-        self.bn2 = nn.BatchNorm2d(mlp[1])
-        self.relu = nn.ReLU()
+        self.pointnet = PointNet(mode="features", input=in_channels)
+        self.args = argparse.Namespace(**{'n_centroids': self.n_centroids, 'nsamples': self.nsamples, 'radius': self.radius})
 
     def forward(self, x, points):
-        centroids_idx = FPS(x, self.n_centroids)
-        centroids = index_point(x, centroids_idx)
-        x_points, g_points, labels, idx = Grouping(x, points, centroids, self.nsamples, self.radius)
+        centroids, x_points, g_points, g_labels, idx = fbsGrouping(x, points, self.args)
+        points, _, inT, feT = self.pointnet(g_points.permute(0, 3, 1, 2))
 
-        points = self.relu(self.bn1(self.conv1(g_points.transpose(1, 3))))
-        points = self.relu(self.bn2(self.conv2(points)))
-        points = torch.max(points, dim = 2)[0].transpose(1, 2)
+        return centroids, x_points.permute(0, 3, 1, 2), points, inT, feT
 
-        return centroids, points
+class PointNetCls(nn.Module):
+    def __init__(self, mode="ddd", k=33):
+        super(PointNetCls, self).__init__()
+        self.as1 = SetApstractionLayer(16, 4, 0.5, 3)
+        self.pointnet1 = PointNet(mode="features", input=1088)
 
-class PointNetpp(nn.Module):
-    def __init__(self, mode="segmentation", k=33):
-        super(PointNetpp, self).__init__()
-        self.as1 = SetApstractionLayer(4096, 32, 0.5, 3, mlp=[64, 128])
-        self.as2 = SetApstractionLayer(1024, 64, 0.5, 128, mlp=[128, 256])
-        self.as3 = SetApstractionLayer(256, 128, 0.5, 256, mlp=[256, 512])
+        self.as2 = SetApstractionLayer(8, 2, 0.5, 1088)
+        self.pointnet2 = PointNet(mode="features", input=1088)
 
-        self.fc1 = nn.Linear(512, 128)
+        self.as3 = SetApstractionLayer(4, 2, 0.5, 1088)
+
+        self.fc1 = nn.Linear(1088, 128)
         self.fc2 = nn.Linear(128, k)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         points = x
-        x, points = self.as1(x, points)
-        x, points = self.as2(x, points)
-        x, points = self.as3(x, points) # output (Batch_size, centroids, D)
+        c, x, points, inT, feT = self.as1(x, points)
+        points, _, _, _ = self.pointnet1(points)
+        points = torch.max(points, dim=3)[0].transpose(1, 2)
+        c, x, points, _, _ = self.as2(c, points)
+        points, _, _, _ = self.pointnet1(points)
+        points = torch.max(points, dim=3)[0].transpose(1, 2)
+        c, x, points, _, _ = self.as3(c, points)
 
-        x = torch.max(points, dim = 1)[0]
+        x = torch.max(points, dim = 3)[0]
+        x = torch.max(x, dim = 2)[0]
 
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
+
+        return x, inT, feT
+
+class PointNetSeg(nn.Module):
+    def __init__(self, mode="ddd", k=33):
+        super(PointNetSeg, self).__init__()
+        self.as1 = SetApstractionLayer(16, 4, 0.5, 3)
+        self.pointnet1 = PointNet(mode="features", input=1088)
+
+        self.as2 = SetApstractionLayer(8, 2, 0.5, 1088)
+        self.pointnet2 = PointNet(mode="features", input=1088)
+
+        self.as3 = SetApstractionLayer(4, 2, 0.5, 1088)
+
+        self.fc1 = nn.Linear(1088, 128)
+        self.fc2 = nn.Linear(128, k)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        points = x
+        c, x, points = self.as1(x, points)
+        points, _, _, _ = self.pointnet1(points)
+        points = torch.max(points, dim=3)[0].transpose(1, 2)
+        c, x, points = self.as2(c, points)
+        points, _, _, _ = self.pointnet1(points)
+        points = torch.max(points, dim=3)[0].transpose(1, 2)
+        c, x, points = self.as3(c, points)
+
+        x = torch.max(points, dim = 3)[0]
+        x = torch.max(x, dim = 2)[0]
+
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+
         return x
+
+# Mode Factory that maps modes to classes
+MODE_FACTORY = {
+    "classification": PointNetCls,
+    "segmentation": PointNetSeg,
+}
+
+def get_pointnetpp_mode(mode, *args, **kwargs):
+    """Fetch the appropriate PointNet model based on the mode."""
+    if mode not in MODE_FACTORY:
+        raise ValueError(f"Mode {mode} is not available.")
+    return MODE_FACTORY[mode](*args, **kwargs)
+
+class PointNetpp(nn.Module):
+    def __init__(self, mode="segmentation", k=33):
+        super(PointNetpp, self).__init__()
+        self.pointnetpp = get_pointnetpp_mode(mode=mode, k = k)
+
+    def forward(self, x):
+        return self.pointnetpp(x)

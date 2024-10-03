@@ -1,20 +1,23 @@
 import os
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
+from factories.sampling_factory import get_sampling_technique
 
-class ModelNet10Dataset(Dataset):
-    def __init__(self, root_dir, split="train", transform=None):
+class ModelNetDataset(Dataset):
+    def __init__(self, args, split="train", transform=None):
         """
         Args:
             root_dir (string): Directory with all the 3D model data (train or test folder).
             split (string): Either "train" or "test".
             transform (callable, optional): Optional transform to be applied on a sample.
         """
-        self.root_dir = root_dir
+        self.root_dir = args.path
         self.classes = os.listdir(self.root_dir)
+        self.sampling_fn = get_sampling_technique(args.sampling)
         self.transform = transform
         self.files = []
+        self.args =  args
 
         # Create a list of all (class, file_path) pairs
         for cls in self.classes:
@@ -34,17 +37,13 @@ class ModelNet10Dataset(Dataset):
         cls, file_path = self.files[idx]
         vertices, faces = read_off(file_path)
 
-
-        sample = {
-            'vertices': torch.tensor(vertices, dtype=torch.float32),
-            'faces': torch.tensor(faces, dtype=torch.long),
-            'label': torch.tensor(self.class_to_idx[cls], dtype=torch.long)
-        }
+        vertices = torch.tensor(vertices, dtype=torch.float32)
+        faces = torch.tensor(faces, dtype=torch.long)
+        label = torch.tensor(self.class_to_idx[cls], dtype=torch.long)
 
         if self.transform:
-            sample = self.transform(sample)
-
-        return sample
+            vertices = self.transform(vertices)
+        return self.sampling_fn(vertices, self.args), label
 
 
 def read_off(file_path):
@@ -67,5 +66,13 @@ def read_off(file_path):
 
         return vertices, faces
 
-def get_dataloader():
-    pass
+def modelnet_data_loaders(args):
+    # Create training and testing datasets
+    train_dataset = ModelNetDataset(split='train', args = args)
+    test_dataset = ModelNetDataset(split='test', args = args)
+
+    # Create DataLoader for both
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+
+    return train_loader, test_loader

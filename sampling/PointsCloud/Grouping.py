@@ -1,5 +1,4 @@
 import torch
-from vis.visulizeGrouped import visualize_with_trimesh
 
 # note for our data: High number of centroids is better from having high number of smaples
 ## while we go deeper we can reduce the number of centroids and incread the number of samples
@@ -7,7 +6,7 @@ from vis.visulizeGrouped import visualize_with_trimesh
 def Grouping(x, points, centroids, nsamples, radius):
     """
     Optimized grouping of nearby points for each centroid with efficient neighbor search and vectorized operations.
-    
+
     Args:
         x (torch.Tensor): Point cloud coordinates of shape (B, N, 3).
         points (torch.Tensor): Additional feature vectors of shape (B, N, D) for each point.
@@ -19,6 +18,8 @@ def Grouping(x, points, centroids, nsamples, radius):
         torch.Tensor: Grouped coordinates of shape (B, C, nsample, 3).
         torch.Tensor: Grouped feature vectors of shape (B, C, nsample, D).
     """
+    if len(x.shape) == 2:
+        x = x.unsqueeze(0)
 
     distance = torch.cdist(centroids, x)
 
