@@ -73,10 +73,10 @@ class PointNetSeg(nn.Module):
     def __init__(self, mode="ddd", k=33):
         super(PointNetSeg, self).__init__()
         self.as1 = SetApstractionLayer(16, 4, 0.5, 3)
-        self.pointnet1 = PointNet(mode="features", input=1088)
+        # self.pointnet1 = PointNet(mode="features", input=1088)
 
         self.as2 = SetApstractionLayer(8, 2, 0.5, 1088)
-        self.pointnet2 = PointNet(mode="features", input=1088)
+        # self.pointnet2 = PointNet(mode="features", input=1088)
 
         self.as3 = SetApstractionLayer(4, 2, 0.5, 1088)
 
@@ -87,10 +87,10 @@ class PointNetSeg(nn.Module):
     def forward(self, x):
         points = x
         c, x, points = self.as1(x, points)
-        points, _, _, _ = self.pointnet1(points)
+        # points, _, _, _ = self.pointnet1(points)
         points = torch.max(points, dim=3)[0].transpose(1, 2)
         c, x, points = self.as2(c, points)
-        points, _, _, _ = self.pointnet1(points)
+        # points, _, _, _ = self.pointnet2(points)
         points = torch.max(points, dim=3)[0].transpose(1, 2)
         c, x, points = self.as3(c, points)
 

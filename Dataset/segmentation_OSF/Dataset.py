@@ -16,6 +16,7 @@ class TeethSegmentationDataset(Dataset):
             test_ids_file (string): Path to the txt file containing IDs for testing.
             transform (callable, optional): Optional transform to be applied on a sample.
         """
+        self.jaw_to_idx = {"lower": 0, "upper": 1}
         self.args = args
         self.split = split
         self.transform = transform
@@ -56,22 +57,22 @@ class TeethSegmentationDataset(Dataset):
         # vertices = mesh_data.vertices.astype(np.float32)
         vertices = torch.tensor(mesh_data.vertices, dtype=torch.float32).unsqueeze(0)
         # faces = mesh_data.faces
-        return self.sampling_fn(vertices, vertices, self.args)
+        return self.sampling_fn(vertices, fea=None, args=self.args)
 
     def _load_labels(self, label_path):
         """Load labels from the JSON file."""
         with open(label_path, 'r') as f:
-            labels = json.load(f)
-        labels = np.maximum(0, np.array(labels['labels']) - 10 - 2 * ((np.array(labels['labels']) // 10) - 1))
-        return torch.tensor(labels, dtype=torch.long)
+            file = json.load(f)
+        labels = np.maximum(0, np.array(file['labels']) - 10 - 2 * ((np.array(file['labels']) // 10) - 1))
+        return torch.tensor(labels, dtype=torch.long), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long)
 
     def __getitem__(self, idx):
         obj_path, label_path = self.data_list[idx]
 
         centroids, vertices, fea_vertices, fe_labels, idx = self._load_obj_file(obj_path)
-        labels = self._load_labels(label_path)
+        labels, jaw = self._load_labels(label_path)
 
-        return vertices.view(-1, 3), labels[idx].view(-1)
+        return vertices.view(-1, 3), labels[idx].view(-1), jaw
 
 # Usage of the dataset
 def OSF_data_loaders(args):

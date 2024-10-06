@@ -7,12 +7,11 @@ class TNetkd(nn.Module):
     def __init__(self, input = 3, mlp = [64, 128, 1024, 512, 256]):
         super(TNetkd, self).__init__()
         self.input=input
-        self.conv1 = nn.Conv2d(in_channels=self.input, out_channels=mlp[0], kernel_size=1)
-        self.conv2 = nn.Conv2d(in_channels=mlp[0], out_channels=mlp[1], kernel_size=1)
-        self.conv3 = nn.Conv2d(in_channels=mlp[1], out_channels=mlp[2], kernel_size=1)
-
-        self.conv4 = nn.Conv2d(in_channels=mlp[2], out_channels=mlp[3], kernel_size=1)
-        self.conv5 = nn.Conv2d(in_channels=mlp[3], out_channels=mlp[4], kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=self.input, out_channels=mlp[0], kernel_size=1, bias=False)
+        self.conv2 = nn.Conv2d(in_channels=mlp[0], out_channels=mlp[1], kernel_size=1, bias=False)
+        self.conv3 = nn.Conv2d(in_channels=mlp[1], out_channels=mlp[2], kernel_size=1, bias=False)
+        self.conv4 = nn.Conv2d(in_channels=mlp[2], out_channels=mlp[3], kernel_size=1, bias=False)
+        self.conv5 = nn.Conv2d(in_channels=mlp[3], out_channels=mlp[4], kernel_size=1, bias=False)
         self.conv6 = nn.Conv2d(in_channels=mlp[4], out_channels=self.input*self.input, kernel_size=1)
 
         self.bn1 = nn.BatchNorm2d(num_features=mlp[0])
@@ -45,15 +44,15 @@ class PointNetGfeat(nn.Module):
         super(PointNetGfeat, self).__init__()
         self.input = input
         self.Tnet3d = TNetkd(self.input)
-        self.conv1 = nn.Conv2d(in_channels=self.input, out_channels=mlp[0], kernel_size=1)
-        self.conv2 = nn.Conv2d(in_channels=mlp[0], out_channels=mlp[1], kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=self.input, out_channels=mlp[0], kernel_size=1, bias=False)
+        self.conv2 = nn.Conv2d(in_channels=mlp[0], out_channels=mlp[1], kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(mlp[0])
         self.bn2 = nn.BatchNorm2d(mlp[1])
 
         self.Tnet64d = TNetkd(mlp[1])
-        self.conv3 = nn.Conv2d(mlp[1], mlp[2], 1)
-        self.conv4 = nn.Conv2d(mlp[2], mlp[3], 1)
-        self.conv5 = nn.Conv2d(mlp[3], mlp[4], 1)
+        self.conv3 = nn.Conv2d(mlp[1], mlp[2], 1, bias=False)
+        self.conv4 = nn.Conv2d(mlp[2], mlp[3], 1, bias=False)
+        self.conv5 = nn.Conv2d(mlp[3], mlp[4], 1, bias=False)
         self.bn3 = nn.BatchNorm2d(mlp[2])
         self.bn4 = nn.BatchNorm2d(mlp[3])
         self.bn5 = nn.BatchNorm2d(mlp[4])
@@ -85,9 +84,9 @@ class PointNetCls(nn.Module):
         self.k = k
         self.input = input
         self.feNet = PointNetGfeat(k = self.input)
-        self.fc1 = nn.Linear(in_features=mlp[0], out_features=mlp[1])
-        self.fc2 = nn.Linear(in_features=mlp[1], out_features=mlp[2])
-        self.fc3 = nn.Linear(in_features=mlp[2], out_features=self.k)
+        self.fc1 = nn.Conv2d(mlp[0], mlp[1], 1, bias=False)
+        self.fc2 = nn.Conv2d(mlp[1], mlp[2], 1, bias=False)
+        self.fc3 = nn.Conv2d(mlp[2], self.k, 1)
 
         self.bn1 = nn.BatchNorm2d(mlp[1])
         self.bn2 = nn.BatchNorm2d(mlp[2])
@@ -95,15 +94,15 @@ class PointNetCls(nn.Module):
         self.drop70 = nn.Dropout(0.70)
 
         self.relu = nn.ReLU()
-        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        x, _, inTra, feTra = self.feNet(x)         # (b, 1024, 1, 1)
-        x = x.squeeze(3).squeeze(2)
+        _, x, inTra, feTra = self.feNet(x)         # (b, 1024, 1, 1)
+        print(x.shape)
 
         x = self.relu(self.drop25(self.bn1(self.fc1(x))))
         x = self.relu(self.drop70(self.bn2(self.fc2(x))))
-        x = self.logsoftmax(self.fc3(x))
+        x = self.fc3(x)
+        x = x.squeeze(3).squeeze(2)
 
         return x, inTra, feTra
 
@@ -112,24 +111,24 @@ class PointNetSeg(nn.Module):
         super(PointNetSeg, self).__init__()
         self.input = input
         self.k = k
-        self.feNet = PointNetGfeat(k = self.input, global_features=False)
-        self.conv1 = nn.Conv2d(mlp[0], mlp[1], 1)
-        self.conv2 = nn.Conv2d(mlp[1], mlp[2], 1)
-        self.conv3 = nn.Conv2d(mlp[2], mlp[3], 1)
+        self.feNet = PointNetGfeat(k = self.input)
+        self.conv1 = nn.Conv2d(mlp[0], mlp[1], 1, bias=False)
+        self.conv2 = nn.Conv2d(mlp[1], mlp[2], 1, bias=False)
+        self.conv3 = nn.Conv2d(mlp[2], mlp[3], 1, bias=False)
         self.conv4 = nn.Conv2d(mlp[3], self.k, 1)
         self.bn1 = nn.BatchNorm2d(mlp[1])
         self.bn2 = nn.BatchNorm2d(mlp[2])
         self.bn3 = nn.BatchNorm2d(mlp[3])
 
         self.relu = nn.ReLU()
-        self.logsoftmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x):
         x, _, inTra, feTra = self.feNet(x)
         x = self.relu(self.bn1(self.conv1(x)))
         x = self.relu(self.bn2(self.conv2(x)))
         x = self.relu(self.bn3(self.conv3(x)))
-        x = self.logsoftmax(self.conv4(x))
+        x = self.conv4(x)
+
         return x, inTra, feTra
 
 

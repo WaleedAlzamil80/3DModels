@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from factories.dataset_factory import get_dataset_loader
 from factories.model_factory import get_model
-from train import train
+from train.train import get_train
 
 from vis.plots import plot_training_data
 from config.args_config import parse_args
@@ -23,7 +23,7 @@ model = get_model(args.model, mode=args.mode, k=args.k).to(device)
 model = nn.DataParallel(model).to(device)
 
 # Train the model
-train_accuracy, test_accuracy, train_loss, test_loss = train(model, train_loader, test_loader, args)
+train_accuracy, test_accuracy, train_loss, test_loss = get_train(args.model, model, train_loader, test_loader, args)
 
 # Save the plots
 plot_training_data(train_accuracy, test_accuracy, train_loss, test_loss, args.output)

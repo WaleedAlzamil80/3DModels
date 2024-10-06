@@ -21,8 +21,3 @@ utils/others
 Dataset/shapenetcore
 Dataset/3Dmatch
 ModelNet10/
-benchMarking.py
-test_align.py 
-test_PointNetpp.py
-test_PointNet.py
-test_DGCNN.py

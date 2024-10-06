@@ -7,12 +7,12 @@ class TNetkd(nn.Module):
     def __init__(self, k = 3):
         super(TNetkd, self).__init__()
         self.k=k
-        self.conv1 = nn.Conv1d(in_channels=self.k, out_channels=64, kernel_size=1)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=1)
-        self.conv3 = nn.Conv1d(in_channels=128, out_channels=1024, kernel_size=1)
+        self.conv1 = nn.Conv1d(in_channels=self.k, out_channels=64, kernel_size=1, bisa=False)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=1, bisa=False)
+        self.conv3 = nn.Conv1d(in_channels=128, out_channels=1024, kernel_size=1, bisa=False)
 
-        self.conv4 = nn.Conv1d(in_channels=1024, out_channels=512, kernel_size=1)
-        self.conv5 = nn.Conv1d(in_channels=512, out_channels=256, kernel_size=1)
+        self.conv4 = nn.Conv1d(in_channels=1024, out_channels=512, kernel_size=1, bisa=False)
+        self.conv5 = nn.Conv1d(in_channels=512, out_channels=256, kernel_size=1, bisa=False)
         self.conv6 = nn.Conv1d(in_channels=256, out_channels=self.k*self.k, kernel_size=1)
 
         # self.fc1 = nn.Linear(in_features=1024, out_features=512)
@@ -51,15 +51,15 @@ class PointNetGfeat(nn.Module):
         self.k = k
         self.global_features = global_features
         self.Tnet3d = TNetkd(self.k)
-        self.conv1 = nn.Conv1d(in_channels=self.k, out_channels=64, kernel_size=1)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=1)
+        self.conv1 = nn.Conv1d(in_channels=self.k, out_channels=64, kernel_size=1, bisa=False)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=1, bisa=False)
         self.bn1 = nn.BatchNorm1d(64)
         self.bn2 = nn.BatchNorm1d(64)
 
         self.Tnet64d = TNetkd(64)
-        self.conv3 = nn.Conv1d(64, 64, 1)
-        self.conv4 = nn.Conv1d(64, 128, 1)
-        self.conv5 = nn.Conv1d(128, 1024, 1)
+        self.conv3 = nn.Conv1d(64, 64, 1, bisa=False)
+        self.conv4 = nn.Conv1d(64, 128, 1, bisa=False)
+        self.conv5 = nn.Conv1d(128, 1024, 1, bisa=False)
         self.bn3 = nn.BatchNorm1d(64)
         self.bn4 = nn.BatchNorm1d(128)
         self.bn5 = nn.BatchNorm1d(1024)
@@ -122,9 +122,9 @@ class PointNetSeg(nn.Module):
         self.input = input
         self.k = k
         self.feNet = PointNetGfeat(k = self.input, global_features=False)
-        self.conv1 = nn.Conv1d(1088, 512, 1)
-        self.conv2 = nn.Conv1d(512, 256, 1)
-        self.conv3 = nn.Conv1d(256, 128, 1)
+        self.conv1 = nn.Conv1d(1088, 512, 1, bisa=False)
+        self.conv2 = nn.Conv1d(512, 256, 1, bisa=False)
+        self.conv3 = nn.Conv1d(256, 128, 1, bisa=False)
         self.conv4 = nn.Conv1d(128, self.k, 1)
         self.bn1 = nn.BatchNorm1d(512)
         self.bn2 = nn.BatchNorm1d(256)
