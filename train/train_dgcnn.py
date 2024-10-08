@@ -15,7 +15,7 @@ def train(model, train_loader, test_loader, args):
     train_loss = []
     test_accuracy = []
     test_loss = []
-    print(model)
+
     print_trainable_parameters(model)
 
     criterion = nn.CrossEntropyLoss()
@@ -28,13 +28,13 @@ def train(model, train_loader, test_loader, args):
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
-            vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
+            vertices, labels, jaw = vertices.to(device), labels.to(device).view(-1), jaw.to(device)
 
             # Forward pass
             outputs, tin = model(vertices, jaw)
-
+            outputs = outputs.reshape(-1, args.k)
             rtin = tnet_regularization(tin)
-            loss = criterion(outputs.reshape(-1, args.k), labels.reshape(-1)) + rtin
+            loss = criterion(outputs, labels) + rtin
             cum_loss += loss.item() + rtin
 
             # Zero the parameter gradients
@@ -60,7 +60,6 @@ def train(model, train_loader, test_loader, args):
         train_accuracy.append(train_epoch_accuracy)
         train_loss.append(cum_loss)
 
-
         model.eval()
         test_labels = []
         test_preds = []
@@ -72,7 +71,7 @@ def train(model, train_loader, test_loader, args):
 
                 # Forward pass
                 outputs, tin = model(vertices, jaw)
-                outputs = outputs.view(-1, args.k)
+                outputs = outputs.reshape(-1, args.k)
                 t_loss += criterion(outputs, labels).item() + tnet_regularization(tin).item()
 
                 # Get predictions and true labels
@@ -90,7 +89,6 @@ def train(model, train_loader, test_loader, args):
         # Append metric  and loss to lists
         test_accuracy.append(test_epoch_accuracy)
         test_loss.append(t_loss)
-
 
         print(f'Epoch [{epoch + 1}/{args.num_epochs}], train_Loss: {cum_loss:.4f}, Accuracy: {train_epoch_accuracy:.4f}')
         print(f'Epoch [{epoch + 1}/{args.num_epochs}], test_Loss: {t_loss:.4f}, Accuracy: {test_epoch_accuracy:.4f}')

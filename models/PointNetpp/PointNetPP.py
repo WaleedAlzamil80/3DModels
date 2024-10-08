@@ -86,21 +86,20 @@ class PointNetSeg(nn.Module):
 
     def forward(self, x):
         points = x
-        c, x, points = self.as1(x, points)
-        # points, _, _, _ = self.pointnet1(points)
-        points = torch.max(points, dim=3)[0].transpose(1, 2)
-        c, x, points = self.as2(c, points)
-        # points, _, _, _ = self.pointnet2(points)
-        points = torch.max(points, dim=3)[0].transpose(1, 2)
-        c, x, points = self.as3(c, points)
 
+        c, x, points, inT, feT = self.as1(x, points)
+        points = torch.max(points, dim=3)[0].transpose(1, 2)
+
+        c, x, points, _, _ = self.as2(c, points)
+        points = torch.max(points, dim=3)[0].transpose(1, 2)
+
+        c, x, points, _, _ = self.as3(c, points)
         x = torch.max(points, dim = 3)[0]
         x = torch.max(x, dim = 2)[0]
 
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
-
-        return x
+        return x, inT, feT
 
 # Mode Factory that maps modes to classes
 MODE_FACTORY = {

@@ -4,7 +4,7 @@ from .Grouping import index_point, Grouping
 def fbsGrouping(x, fea=None, args=None):
     if len(x.shape) == 2:
         x = x.unsqueeze(0)
-    if not fea:
+    if fea == None:
         fea = x
 
     centroids_idx = FPS(x, args.n_centroids)

@@ -2,7 +2,7 @@ import torch
 
 # note for our data: High number of centroids is better from having high number of smaples
 ## while we go deeper we can reduce the number of centroids and incread the number of samples
-
+ 
 def Grouping(x, points, centroids, nsamples, radius):
     """
     Optimized grouping of nearby points for each centroid with efficient neighbor search and vectorized operations.

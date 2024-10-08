@@ -4,7 +4,7 @@ import os
 import json
 import numpy as np
 import trimesh
-
+import time
 from factories.sampling_factory import get_sampling_technique
 
 class TeethSegmentationDataset(Dataset):
@@ -78,24 +78,26 @@ class TeethSegmentationDataset(Dataset):
         vertices_np_cleaned = vertices_np[valid_mask]
 
         # Step 2: Convert cleaned NumPy vertices to PyTorch tensor
-        vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0)  # Shape (1, valid_n, 3)
+        vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0).to('cuda')  # Shape (1, valid_n, 3)
 
         # Step 3: Use PyTorch for FPS and Grouping (sampling function)
-        return self.sampling_fn(vertices_tensor, fea=None, args=self.args)
+        centroids, vertices, fea_vertices, fe_labels, idx = self.sampling_fn(vertices_tensor, fea=None, args=self.args)
+
+        return centroids, vertices, fea_vertices, fe_labels, idx, valid_mask
 
     def _load_labels(self, label_path):
         """Load labels from the JSON file."""
         with open(label_path, 'r') as f:
             file = json.load(f)
         labels = np.maximum(0, np.array(file['labels']) - 10 - 2 * ((np.array(file['labels']) // 10) - 1))
-        return torch.tensor(labels, dtype=torch.long), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long)
+        return np.array(labels, dtype=np.int64), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long).to('cuda')
 
     def __getitem__(self, idx):
         obj_path, label_path = self.data_list[idx]
 
-        centroids, vertices, fea_vertices, fe_labels, idx = self._load_obj_file(obj_path)
+        centroids, vertices, fea_vertices, fe_labels, idx, valid_mask = self._load_obj_file(obj_path)
         labels, jaw = self._load_labels(label_path)
-
+        labels = torch.tensor(labels[valid_mask], dtype=torch.long).to('cuda')
         return vertices.view(-1, 3), labels[idx].view(-1), jaw
 
 # Usage of the dataset

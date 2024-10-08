@@ -27,12 +27,14 @@ def train(model, train_loader, test_loader, args):
         train_preds = []
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
-            vertices, labels = vertices.to(device), labels.to(device)
+            vertices, labels = vertices.to(device), labels.to(device).view(-1)
 
             # Forward pass
             outputs, tin, tfe = model(vertices)
             rtin, rtfe = tnet_regularization(tin), tnet_regularization(tfe)
-            loss = criterion(outputs.reshape(-1, args.k), labels.reshape(-1)) + rtin + 0.001 * rtfe
+
+            outputs = outputs.reshape(-1, args.k)
+            loss = criterion(outputs, labels) + rtin + 0.001 * rtfe
             cum_loss += loss.item() + rtin + 0.001 * rtfe
 
             # Zero the parameter gradients
@@ -58,14 +60,13 @@ def train(model, train_loader, test_loader, args):
         train_accuracy.append(train_epoch_accuracy)
         train_loss.append(cum_loss)
 
-
         model.eval()
         test_labels = []
         test_preds = []
         t_loss = 0
 
         with torch.no_grad():
-            for vertices, labels in tqdm(test_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
+            for vertices, labels, jaw in tqdm(test_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
                 vertices, labels = vertices.to(device), labels.to(device).view(-1)
 
                 # Forward pass
@@ -88,7 +89,6 @@ def train(model, train_loader, test_loader, args):
         # Append metric  and loss to lists
         test_accuracy.append(test_epoch_accuracy)
         test_loss.append(t_loss)
-
 
         print(f'Epoch [{epoch + 1}/{args.num_epochs}], train_Loss: {cum_loss:.4f}, Accuracy: {train_epoch_accuracy:.4f}')
         print(f'Epoch [{epoch + 1}/{args.num_epochs}], test_Loss: {t_loss:.4f}, Accuracy: {test_epoch_accuracy:.4f}')
