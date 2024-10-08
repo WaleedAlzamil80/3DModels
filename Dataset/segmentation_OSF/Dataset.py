@@ -52,12 +52,36 @@ class TeethSegmentationDataset(Dataset):
         return len(self.data_list)
 
     def _load_obj_file(self, obj_path):
-        """Load .obj file and return vertices and faces."""
+        """Load .obj file, clean vertices using NumPy, and return processed vertices."""
+        # Load the .obj file using trimesh
         mesh_data = trimesh.load(obj_path)
-        # vertices = mesh_data.vertices.astype(np.float32)
-        vertices = torch.tensor(mesh_data.vertices, dtype=torch.float32).unsqueeze(0)
-        # faces = mesh_data.faces
-        return self.sampling_fn(vertices, fea=None, args=self.args)
+
+        # Step 1: Use NumPy for initial cleaning
+        vertices_np = mesh_data.vertices.astype(np.float32)
+        origin = mesh_data.centroid
+
+        # Apply NumPy filtering on z, y, and x values based on given conditions
+        z_values = vertices_np[:, 2]
+        y_values = vertices_np[:, 1]
+        x_values = vertices_np[:, 0]
+
+        y_mean = np.mean(y_values)
+        y_std = np.std(y_values)
+        x_mean = np.mean(x_values)
+        x_std = np.std(x_values)
+
+        valid_mask = (z_values >= (origin[2] + 2)) & \
+                     (y_values <= (y_mean + 2 * y_std)) & (y_values >= (y_mean - 2 * y_std)) & \
+                     (x_values <= (x_mean + 2 * x_std)) & (x_values >= (x_mean - 2 * x_std))
+
+        # Apply the mask to filter points
+        vertices_np_cleaned = vertices_np[valid_mask]
+
+        # Step 2: Convert cleaned NumPy vertices to PyTorch tensor
+        vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0)  # Shape (1, valid_n, 3)
+
+        # Step 3: Use PyTorch for FPS and Grouping (sampling function)
+        return self.sampling_fn(vertices_tensor, fea=None, args=self.args)
 
     def _load_labels(self, label_path):
         """Load labels from the JSON file."""

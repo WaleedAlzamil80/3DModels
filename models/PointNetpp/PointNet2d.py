@@ -97,7 +97,6 @@ class PointNetCls(nn.Module):
 
     def forward(self, x):
         _, x, inTra, feTra = self.feNet(x)         # (b, 1024, 1, 1)
-        print(x.shape)
 
         x = self.relu(self.drop25(self.bn1(self.fc1(x))))
         x = self.relu(self.drop70(self.bn2(self.fc2(x))))

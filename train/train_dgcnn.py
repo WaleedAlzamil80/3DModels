@@ -32,9 +32,7 @@ def train(model, train_loader, test_loader, args):
 
             # Forward pass
             outputs, tin = model(vertices, jaw)
-            print(outputs.shape)
-            print(labels.shape)
-            print(jaw.shape)
+
             rtin = tnet_regularization(tin)
             loss = criterion(outputs.reshape(-1, args.k), labels.reshape(-1)) + rtin
             cum_loss += loss.item() + rtin

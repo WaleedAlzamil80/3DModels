@@ -27,13 +27,10 @@ def train(model, train_loader, test_loader, args):
         train_preds = []
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
-            print(jaw.shape)
             vertices, labels = vertices.to(device), labels.to(device)
 
             # Forward pass
             outputs, tin, tfe = model(vertices)
-            print(outputs.shape)
-            print(labels.shape)
             rtin, rtfe = tnet_regularization(tin), tnet_regularization(tfe)
             loss = criterion(outputs.reshape(-1, args.k), labels.reshape(-1)) + rtin + 0.001 * rtfe
             cum_loss += loss.item() + rtin + 0.001 * rtfe
