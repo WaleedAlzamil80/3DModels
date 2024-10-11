@@ -78,7 +78,7 @@ class TeethSegmentationDataset(Dataset):
         vertices_np_cleaned = vertices_np[valid_mask]
 
         # Step 2: Convert cleaned NumPy vertices to PyTorch tensor
-        vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0).to('cuda')  # Shape (1, valid_n, 3)
+        vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0) #.to('cuda')  # Shape (1, valid_n, 3)
 
         # Step 3: Use PyTorch for FPS and Grouping (sampling function)
         centroids, vertices, fea_vertices, fe_labels, idx = self.sampling_fn(vertices_tensor, fea=None, args=self.args)
@@ -90,14 +90,14 @@ class TeethSegmentationDataset(Dataset):
         with open(label_path, 'r') as f:
             file = json.load(f)
         labels = np.maximum(0, np.array(file['labels']) - 10 - 2 * ((np.array(file['labels']) // 10) - 1))
-        return np.array(labels, dtype=np.int64), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long).to('cuda')
+        return np.array(labels, dtype=np.int64), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long) #.to('cuda')
 
     def __getitem__(self, idx):
         obj_path, label_path = self.data_list[idx]
 
         centroids, vertices, fea_vertices, fe_labels, idx, valid_mask = self._load_obj_file(obj_path)
         labels, jaw = self._load_labels(label_path)
-        labels = torch.tensor(labels[valid_mask], dtype=torch.long).to('cuda')
+        labels = torch.tensor(labels[valid_mask], dtype=torch.long)#.to('cuda')
         return vertices.view(-1, 3), labels[idx].view(-1), jaw
 
 # Usage of the dataset
