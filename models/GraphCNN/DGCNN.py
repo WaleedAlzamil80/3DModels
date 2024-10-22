@@ -1,8 +1,9 @@
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..PointNetpp.PointNet2d import TNetkd
-from sampling.PointsCloud.knn import neigh
+from sampling.PointsCloud.knn import kdneighGPU
 
 import argparse
 
@@ -25,7 +26,7 @@ class EdgeConv(nn.Module):
         self.args = argparse.Namespace(**{'knn': self.k})
 
     def forward(self, x):
-        x = neigh(x, self.args).permute(0, 3, 1, 2)
+        x = kdneighGPU(x, self.args).permute(0, 3, 1, 2)
         x = self.conv(x)
         x = torch.max(x, dim=-1, keepdim=False)[0]
         return x.permute(0, 2, 1)

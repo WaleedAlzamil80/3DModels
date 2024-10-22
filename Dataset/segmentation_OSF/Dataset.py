@@ -4,7 +4,6 @@ import os
 import json
 import numpy as np
 import trimesh
-import time
 from factories.sampling_factory import get_sampling_technique
 
 class TeethSegmentationDataset(Dataset):
@@ -77,13 +76,16 @@ class TeethSegmentationDataset(Dataset):
         # Apply the mask to filter points
         vertices_np_cleaned = vertices_np[valid_mask]
 
-        # Step 2: Convert cleaned NumPy vertices to PyTorch tensor
-        vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0) #.to('cuda')  # Shape (1, valid_n, 3)
+        # # Step 2: Convert cleaned NumPy vertices to PyTorch tensor
+        # vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0) #.to('cuda')  # Shape (1, valid_n, 3)
+        # # Step 3: Use PyTorch for FPS and Grouping (sampling function)
+        # centroids, vertices, fea_vertices, fe_labels, idx = self.sampling_fn(vertices_tensor, fea=None, args=self.args)
+        # return centroids, vertices, fea_vertices, fe_labels, idx, valid_mask
+        # start = time.time()
+        points, idx = self.sampling_fn(vertices_np_cleaned, self.args.n_centroids, self.args.nsamples)
+        # print(time.time() - start)
 
-        # Step 3: Use PyTorch for FPS and Grouping (sampling function)
-        centroids, vertices, fea_vertices, fe_labels, idx = self.sampling_fn(vertices_tensor, fea=None, args=self.args)
-
-        return centroids, vertices, fea_vertices, fe_labels, idx, valid_mask
+        return points, idx, valid_mask
 
     def _load_labels(self, label_path):
         """Load labels from the JSON file."""
@@ -95,10 +97,15 @@ class TeethSegmentationDataset(Dataset):
     def __getitem__(self, idx):
         obj_path, label_path = self.data_list[idx]
 
-        centroids, vertices, fea_vertices, fe_labels, idx, valid_mask = self._load_obj_file(obj_path)
+        # centroids, vertices, fea_vertices, fe_labels, idx, valid_mask = self._load_obj_file(obj_path)
+        vertices, idx, valid_mask = self._load_obj_file(obj_path)
+
+        # Convert vertices to a PyTorch tensor and apply the view transformation
+        vertices = torch.tensor(vertices, dtype=torch.float32).view(-1, 3)
+
         labels, jaw = self._load_labels(label_path)
-        labels = torch.tensor(labels[valid_mask], dtype=torch.long)#.to('cuda')
-        return vertices.view(-1, 3), labels[idx].view(-1), jaw
+        labels = torch.tensor(labels[valid_mask][idx], dtype=torch.long) #.to('cuda')
+        return vertices.view(-1, 3), labels.view(-1), jaw
 
 # Usage of the dataset
 def OSF_data_loaders(args):
