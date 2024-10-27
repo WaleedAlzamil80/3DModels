@@ -1,6 +1,5 @@
 from scipy.spatial import cKDTree
 import torch
-import faiss
 
 def neigh(x, args):
 
@@ -98,45 +97,6 @@ def kdneighGPU(x, args):
         edge_features.append(edge_feature)
 
     # Stack the edge features for the entire batch
-    edge_features = torch.stack(edge_features)
-    
-    return edge_features
-
-
-def neigh_faiss(x, args):
-
-    if len(x.shape) == 2:
-        x = x.unsqueeze(0)
-
-    k = args.knn
-    batch_size, num_points, num_features = x.shape
-
-    edge_features = []
-
-    for batch_idx in range(batch_size):
-        # FAISS works on float32, ensure the data is of correct type
-        x_batch = x[batch_idx].contiguous().float()
-
-        # Build FAISS index for GPU
-        index = faiss.IndexFlatL2(num_features)  # L2 distance
-        res = faiss.StandardGpuResources()  # Create GPU resource
-        index_gpu = faiss.index_cpu_to_gpu(res, 0, index)  # Move index to GPU
-
-        # Add points to the index
-        index_gpu.add(x_batch)
-
-        # Perform k-NN search on GPU (excluding self, so k+1 neighbors)
-        distances, idx = index_gpu.search(x_batch, k + 1)
-        idx = idx[:, 1:]  # Exclude the first neighbor (self)
-
-        # Gather neighbors using indices
-        neighbors = x[batch_idx][idx]
-
-        # Compute edge features as concatenation of central point and neighbors
-        central_point = x[batch_idx].unsqueeze(1).expand(-1, k, -1)
-        edge_feature = torch.cat([central_point, neighbors - central_point], dim=-1)
-        edge_features.append(edge_feature)
-
     edge_features = torch.stack(edge_features)
     
     return edge_features

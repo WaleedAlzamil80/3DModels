@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 
@@ -22,8 +23,11 @@ model = get_model(args.model, mode=args.mode, k=args.k).to(device)
 # Wrap the model in DataParallel for multi-GPU training
 model = nn.DataParallel(model).to(device)
 
+if not os.path.exists(args.output):
+    os.makedirs(args.output)
+
 # Train the model
-train_accuracy, test_accuracy, train_loss, test_loss = get_train(args.model, model, train_loader, test_loader, args)
+train_miou, test_miou, train_acc, test_acc, train_accuracy, test_accuracy, train_loss, test_loss = get_train(args.model, model, train_loader, test_loader, args)
 
 # Save the plots
-plot_training_data(train_accuracy, test_accuracy, train_loss, test_loss, args.output)
+plot_training_data(train_miou, test_miou, train_acc, test_acc, train_accuracy, test_accuracy, train_loss, test_loss, args.output)

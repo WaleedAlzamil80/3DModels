@@ -68,10 +68,11 @@ class TeethSegmentationDataset(Dataset):
         y_std = np.std(y_values)
         x_mean = np.mean(x_values)
         x_std = np.std(x_values)
+        alpha = 2.0
 
-        valid_mask = (z_values >= (origin[2] + 2)) & \
-                     (y_values <= (y_mean + 2 * y_std)) & (y_values >= (y_mean - 2 * y_std)) & \
-                     (x_values <= (x_mean + 2 * x_std)) & (x_values >= (x_mean - 2 * x_std))
+        valid_mask = (z_values > (origin[2] + 2)) & \
+                     (y_values < (y_mean + alpha * y_std)) & (y_values > (y_mean - alpha * y_std)) & \
+                     (x_values < (x_mean + alpha * x_std)) & (x_values > (x_mean - alpha * x_std))
 
         # Apply the mask to filter points
         vertices_np_cleaned = vertices_np[valid_mask]

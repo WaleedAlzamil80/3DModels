@@ -5,7 +5,7 @@ from losses.PointNetLosses import tnet_regularization
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 from utils.helpful import print_trainable_parameters
-
+from vis.visulizeGrouped import visualize_with_trimesh
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
 
@@ -35,7 +35,7 @@ def train(model, train_loader, test_loader, args):
 
             outputs = outputs.reshape(-1, args.k)
             loss = criterion(outputs, labels) + rtin + 0.001 * rtfe
-            cum_loss += loss.item() + rtin + 0.001 * rtfe
+            cum_loss += loss.item()
 
             # Zero the parameter gradients
             optimizer.zero_grad()
