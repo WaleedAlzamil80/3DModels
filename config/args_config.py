@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument('--output', type=str, default="output", help="Output path")
 
     parser.add_argument('--test_ids', type=str, default="private-testing-set.txt", help="Path of the ids dataset for testing")
-    parser.add_argument('--p', type=int, default=3, help="data parts")
+    parser.add_argument('--p', type=int, default=6, help="data parts")
 
     parser.add_argument('--k', type=int, default=33, help="Number classes")
     parser.add_argument('--model', type=str, default="PointNet", help="Select the model")

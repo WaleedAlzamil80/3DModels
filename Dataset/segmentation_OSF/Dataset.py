@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import os
 import json
 import numpy as np
-import trimesh
+import fastmesh as fm
 from factories.sampling_factory import get_sampling_technique
 
 class TeethSegmentationDataset(Dataset):
@@ -42,22 +42,21 @@ class TeethSegmentationDataset(Dataset):
                     sr = sample_id + "_" + region
                     if (self.split == 'test' and sr in self.test_ids) or \
                        (self.split == 'train' and sr not in self.test_ids):
-                        obj_path = os.path.join(region_dir, sample_id, f'{sample_id}_{region}.obj')
+                        bmesh_path = os.path.join(region_dir, sample_id, f'{sample_id}_{region}.bmesh')
                         label_path = os.path.join(region_dir, sample_id, f'{sample_id}_{region}.json')
-                        data_list.append((obj_path, label_path))
+                        data_list.append((bmesh_path, label_path))
         return data_list
 
     def __len__(self):
         return len(self.data_list)
 
-    def _load_obj_file(self, obj_path):
-        """Load .obj file, clean vertices using NumPy, and return processed vertices."""
-        # Load the .obj file using trimesh
-        mesh_data = trimesh.load(obj_path)
+    def _load_bmesh_file(self, bmesh_path):
+        """Load .bemsh file, clean vertices using NumPy, and return processed vertices."""
+        # Load the .bemsh file using trimesh
+        vertices_np = fm.load(bmesh_path)[0]
 
         # Step 1: Use NumPy for initial cleaning
-        vertices_np = mesh_data.vertices.astype(np.float32)
-        origin = mesh_data.centroid
+        origin = np.mean(vertices_np, axis=0)
 
         # Apply NumPy filtering on z, y, and x values based on given conditions
         z_values = vertices_np[:, 2]
@@ -70,21 +69,13 @@ class TeethSegmentationDataset(Dataset):
         x_std = np.std(x_values)
         alpha = 2.0
 
-        valid_mask = (z_values > (origin[2] + 2)) & \
+        valid_mask = (z_values > (origin[2] - 5)) & \
                      (y_values < (y_mean + alpha * y_std)) & (y_values > (y_mean - alpha * y_std)) & \
                      (x_values < (x_mean + alpha * x_std)) & (x_values > (x_mean - alpha * x_std))
 
         # Apply the mask to filter points
         vertices_np_cleaned = vertices_np[valid_mask]
-
-        # # Step 2: Convert cleaned NumPy vertices to PyTorch tensor
-        # vertices_tensor = torch.tensor(vertices_np_cleaned, dtype=torch.float32).unsqueeze(0) #.to('cuda')  # Shape (1, valid_n, 3)
-        # # Step 3: Use PyTorch for FPS and Grouping (sampling function)
-        # centroids, vertices, fea_vertices, fe_labels, idx = self.sampling_fn(vertices_tensor, fea=None, args=self.args)
-        # return centroids, vertices, fea_vertices, fe_labels, idx, valid_mask
-        # start = time.time()
         points, idx = self.sampling_fn(vertices_np_cleaned, self.args.n_centroids, self.args.nsamples)
-        # print(time.time() - start)
 
         return points, idx, valid_mask
 
@@ -93,19 +84,18 @@ class TeethSegmentationDataset(Dataset):
         with open(label_path, 'r') as f:
             file = json.load(f)
         labels = np.maximum(0, np.array(file['labels']) - 10 - 2 * ((np.array(file['labels']) // 10) - 1))
-        return np.array(labels, dtype=np.int64), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long) #.to('cuda')
+        return np.array(labels, dtype=np.int64), torch.tensor(self.jaw_to_idx[file['jaw']], dtype=torch.long)
 
     def __getitem__(self, idx):
-        obj_path, label_path = self.data_list[idx]
+        bmesh_path, label_path = self.data_list[idx]
 
-        # centroids, vertices, fea_vertices, fe_labels, idx, valid_mask = self._load_obj_file(obj_path)
-        vertices, idx, valid_mask = self._load_obj_file(obj_path)
+        vertices, idx, valid_mask = self._load_bmesh_file(bmesh_path)
 
         # Convert vertices to a PyTorch tensor and apply the view transformation
         vertices = torch.tensor(vertices, dtype=torch.float32).view(-1, 3)
 
         labels, jaw = self._load_labels(label_path)
-        labels = torch.tensor(labels[valid_mask][idx], dtype=torch.long) #.to('cuda')
+        labels = torch.tensor(labels[valid_mask][idx], dtype=torch.long)
         return vertices.view(-1, 3), labels.view(-1), jaw
 
 # Usage of the dataset

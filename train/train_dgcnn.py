@@ -40,6 +40,7 @@ def train(model, train_loader, test_loader, args):
         test_acc_e = []
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
+
             vertices, labels, jaw = vertices.to(device), labels.to(device).view(-1), jaw.to(device)
 
             # Forward pass
