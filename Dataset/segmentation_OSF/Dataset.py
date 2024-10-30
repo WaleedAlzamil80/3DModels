@@ -5,6 +5,7 @@ import json
 import numpy as np
 import fastmesh as fm
 from factories.sampling_factory import get_sampling_technique
+from ..transformations.rigid import random_rigid_transform
 
 class TeethSegmentationDataset(Dataset):
     def __init__(self, split='train',  transform=None, p=7, args = None):
@@ -75,6 +76,7 @@ class TeethSegmentationDataset(Dataset):
 
         # Apply the mask to filter points
         vertices_np_cleaned = vertices_np[valid_mask]
+
         points, idx = self.sampling_fn(vertices_np_cleaned, self.args.n_centroids, self.args.nsamples)
 
         return points, idx, valid_mask
@@ -91,6 +93,9 @@ class TeethSegmentationDataset(Dataset):
 
         vertices, idx, valid_mask = self._load_bmesh_file(bmesh_path)
 
+        if self.transform:
+            vertices = random_rigid_transform(vertices)
+
         # Convert vertices to a PyTorch tensor and apply the view transformation
         vertices = torch.tensor(vertices, dtype=torch.float32).view(-1, 3)
 
@@ -101,7 +106,7 @@ class TeethSegmentationDataset(Dataset):
 # Usage of the dataset
 def OSF_data_loaders(args):
     # Create training and testing datasets
-    train_dataset = TeethSegmentationDataset(split='train', p=args.p, args=args)
+    train_dataset = TeethSegmentationDataset(split='train', transform=True, p=args.p, args=args)
     test_dataset = TeethSegmentationDataset(split='test', p=args.p, args=args)
 
     # Create DataLoader for both

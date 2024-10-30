@@ -119,6 +119,6 @@ def train(model, train_loader, test_loader, args):
         print("----------------------------------------------------------------------------------------------")
     print('Training finished.')
 
-    torch.save(model.state_dict(), os.path.join(args.output, f"{args.model}_{epoch}.pth"))
+    torch.save(model.state_dict(), os.path.join(args.output, f"{args.model}_{epoch + 1}.pth"))
 
     return train_miou, test_miou, train_acc, test_acc, train_accuracy, test_accuracy, train_loss, test_loss
