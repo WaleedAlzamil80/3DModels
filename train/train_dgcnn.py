@@ -49,7 +49,7 @@ def train(model, train_loader, test_loader, args):
             outputs = outputs.reshape(-1, args.k)
             rtin = tnet_regularization(tin)
             loss = criterion(outputs, labels) + rtin
-            cum_loss += loss.item() + rtin
+            cum_loss += (loss.item() + rtin.item())
 
             # Zero the parameter gradients
             optimizer.zero_grad()
@@ -77,7 +77,7 @@ def train(model, train_loader, test_loader, args):
         cum_loss /= len(train_loader)
 
         train_accuracy.append(train_epoch_accuracy)
-        train_loss.append(cum_loss.cpu())
+        train_loss.append(cum_loss)
 
         model.eval()
         test_labels = []
@@ -119,6 +119,6 @@ def train(model, train_loader, test_loader, args):
         print("----------------------------------------------------------------------------------------------")
     print('Training finished.')
 
-    torch.save(model.state_dict(), os.path.join(args.output, f"model_epoch_{epoch}.pth"))
+    torch.save(model.state_dict(), os.path.join(args.output, f"{args.model}_{epoch}.pth"))
 
     return train_miou, test_miou, train_acc, test_acc, train_accuracy, test_accuracy, train_loss, test_loss

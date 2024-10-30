@@ -19,6 +19,14 @@ train_loader, test_loader = get_dataset_loader(args.Dataset, args)
 
 # Use the factory to dynamically get the model
 model = get_model(args.model, mode=args.mode, k=args.k).to(device)
+model = nn.DataParallel(model).to(device)
+
+if args.pretrained is not None and os.path.isdir(args.pretrained):
+    print(f"Loading pretrained model from {args.pretrained}")
+    state_dict = torch.load(args.pretrained, map_location=device)
+    model.load_state_dict(state_dict)
+else:
+    print(f"Instantiating new model from {args.model}")
 
 # Wrap the model in DataParallel for multi-GPU training
 model = nn.DataParallel(model).to(device)

@@ -24,6 +24,7 @@ def parse_args():
 
     parser.add_argument('--k', type=int, default=33, help="Number classes")
     parser.add_argument('--model', type=str, default="PointNet", help="Select the model")
+    parser.add_argument('--pretrained', type=str, default=None, help="Path to pretrained models")
     parser.add_argument('--mode', type=str, default="segmentation", help="Problems ex:- segmentaion, classification")
     parser.add_argument('--lr', type=float, default=0.001, help="Learning Rate")
 
