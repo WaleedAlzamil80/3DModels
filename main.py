@@ -24,15 +24,12 @@ model = nn.DataParallel(model).to(device)
 if args.pretrained is not None and os.path.exists(args.pretrained):
     try:
         print(f"Loading pretrained model from {args.pretrained}")
-        state_dict = torch.load(args.pretrained, map_location=device)
+        state_dict = torch.load(args.pretrained, map_location=device, weights_only=True)
         model.load_state_dict(state_dict)
     except:
         print(f"The pretrained model {args.pretrained} is not for {args.model} architecture")
 else:
     print(f"Instantiating new model from {args.model}")
-
-# Wrap the model in DataParallel for multi-GPU training
-model = nn.DataParallel(model).to(device)
 
 if not os.path.exists(args.output):
     os.makedirs(args.output)
