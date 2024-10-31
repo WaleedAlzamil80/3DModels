@@ -28,4 +28,7 @@ def parse_args():
     parser.add_argument('--mode', type=str, default="segmentation", help="Problems ex:- segmentaion, classification")
     parser.add_argument('--lr', type=float, default=0.001, help="Learning Rate")
 
+    parser.add_argument('--rigid_augmentation_train', action='store_true', help="More Transformations")
+    parser.add_argument('--rigid_augmentation_test', action='store_true', help="More Transformations")
+
     return parser.parse_args()

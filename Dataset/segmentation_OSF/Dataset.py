@@ -106,8 +106,8 @@ class TeethSegmentationDataset(Dataset):
 # Usage of the dataset
 def OSF_data_loaders(args):
     # Create training and testing datasets
-    train_dataset = TeethSegmentationDataset(split='train', transform=True, p=args.p, args=args)
-    test_dataset = TeethSegmentationDataset(split='test', p=args.p, args=args)
+    train_dataset = TeethSegmentationDataset(split='train', transform=args.rigid_augmentation_train, p=args.p, args=args)
+    test_dataset = TeethSegmentationDataset(split='test', transform=args.rigid_augmentation_test, p=args.p, args=args)
 
     # Create DataLoader for both
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
