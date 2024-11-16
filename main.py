@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from factories.dataset_factory import get_dataset_loader
 from factories.model_factory import get_model
-from train.train import get_train
+from factories.train_factory import get_train
 
 from vis.plots import plot_training_data
 from config.args_config import parse_args

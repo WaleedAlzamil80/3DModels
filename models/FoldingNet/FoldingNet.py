@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class GBEncoder(nn.Module):
     def __init__(self):
-        super(GBEncoder, self).__init__()
+        super(GBEncoder, self).__init__() 
 
     def forward(self, x):
         pass 

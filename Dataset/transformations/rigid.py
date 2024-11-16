@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-def random_rigid_transform(points, rotation_range=(0, 360), translation_range=(-1, 1)):
+def random_rigid_transform(points, rotation_range=(0, 360), translation_range=(-0.5, 0.5)):
     # Generate random rotation angles within the specified range
     rotation_angles = np.random.uniform(rotation_range[0], rotation_range[1], size=3)
     

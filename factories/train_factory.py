@@ -1,12 +1,15 @@
-from .train_pointnet import train as pointnetTrain
-from .train_dgcnn import train as graphTrain
+from train.train_pointnet import train as pointnetTrain
+from train.train_dgcnn import train as graphTrain
+from train.train_sp import train as sptrain
 
-# Mode Factory that maps modes to classes
+# Factory to choose the suitable training Loop use args
 TRAIN_FACTORY = {
     "PointNet": pointnetTrain,
     "PointNet++": pointnetTrain,
+    "KCNet": graphTrain,
+    "FoldingNet": graphTrain,
+    "SpatialTransformer": sptrain,
     "DynamicGraphCNN": graphTrain,
-    "MeshCNN": pointnetTrain,
 }
 
 def get_train(model, *args, **kwargs):

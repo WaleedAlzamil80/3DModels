@@ -2,7 +2,9 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
-from losses.PointNetLosses import tnet_regularization
+from losses.RegularizarionPointNet import tnet_regularization
+from factories.losses_factory import get_loss
+
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 from utils.helpful import print_trainable_parameters
@@ -27,7 +29,7 @@ def train(model, train_loader, test_loader, args):
 
     print_trainable_parameters(model)
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = get_loss(args.loss)
     optimizer = torch.optim.Adam(model.parameters(), args.lr)
 
     for epoch in range(args.num_epochs):

@@ -74,6 +74,7 @@ def kdneighGPU(x, args):
     batch_size, num_points, num_features = x.shape
 
     edge_features = []
+    neighborsF = []
 
     # Loop over the batch
     for batch_idx in range(batch_size):
@@ -95,8 +96,10 @@ def kdneighGPU(x, args):
         edge_feature = torch.cat([central_point, neighbors - central_point], dim=-1)
 
         edge_features.append(edge_feature)
+        neighborsF.append(neighbors)
 
     # Stack the edge features for the entire batch
     edge_features = torch.stack(edge_features)
-    
-    return edge_features
+    neighborsF = torch.stack(neighborsF)
+
+    return edge_features, neighborsF

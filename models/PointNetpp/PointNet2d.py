@@ -4,7 +4,7 @@ from torch import nn
 # the input shape should be (Batch_Size, In_channels, Centroids, Samples)
 
 class TNetkd(nn.Module):
-    def __init__(self, input = 3, mlp = [64, 128, 1024, 512, 256]):
+    def __init__(self, input = 3, mlp = [64, 128, 1024, 512, 256], mode = None, k = None):
         super(TNetkd, self).__init__()
         self.input=input
         self.conv1 = nn.Conv2d(in_channels=self.input, out_channels=mlp[0], kernel_size=1, bias=False)

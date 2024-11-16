@@ -26,8 +26,9 @@ class EdgeConv(nn.Module):
         self.args = argparse.Namespace(**{'knn': self.k})
 
     def forward(self, x):
-        x = kdneighGPU(x, self.args).permute(0, 3, 1, 2)
-        x = self.conv(x)
+        x, y = kdneighGPU(x, self.args)
+
+        x = self.conv(x.permute(0, 3, 1, 2))
         x = torch.max(x, dim=-1, keepdim=False)[0]
         return x.permute(0, 2, 1)
 

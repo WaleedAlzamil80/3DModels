@@ -1,15 +1,20 @@
-from models.PointNetpp.PointNet2d import PointNet
+from models.PointNetpp.PointNet2d import PointNet, TNetkd
 from models.PointNetpp.PointNetPP import PointNetpp
 from models.GraphCNN.DGCNN import DGCNN
+
+from models.FoldingNet.Mining import GaussianKernelConv
+from models.FoldingNet.FoldingNet import FoldingNet
+from models.Transformers.PCT import PCTransformer
 
 # Dictionary that maps model names to model classes
 MODEL_FACTORY = {
     "PointNet": PointNet,
     "PointNet++": PointNetpp,
-    # "FoldingNet": FoldingNet,
+    "KCNet": GaussianKernelConv,
+    "FoldingNet": FoldingNet,
     "DynamicGraphCNN": DGCNN,
-    # "MeshCNN": MeshCNN,
-    # "PCT": PCTransformer,
+    "SpatialTransformer": TNetkd,
+    "PCT": PCTransformer,
 }
 
 def get_model(name, **kwargs):

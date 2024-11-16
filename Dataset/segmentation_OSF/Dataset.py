@@ -55,27 +55,30 @@ class TeethSegmentationDataset(Dataset):
         """Load .bemsh file, clean vertices using NumPy, and return processed vertices."""
         # Load the .bemsh file using trimesh
         vertices_np = fm.load(bmesh_path)[0]
+        if self.args.clean:
+            # Step 1: Use NumPy for initial cleaning
+            origin = np.mean(vertices_np, axis=0)
 
-        # Step 1: Use NumPy for initial cleaning
-        origin = np.mean(vertices_np, axis=0)
+            # Apply NumPy filtering on z, y, and x values based on given conditions
+            z_values = vertices_np[:, 2]
+            y_values = vertices_np[:, 1]
+            x_values = vertices_np[:, 0]
 
-        # Apply NumPy filtering on z, y, and x values based on given conditions
-        z_values = vertices_np[:, 2]
-        y_values = vertices_np[:, 1]
-        x_values = vertices_np[:, 0]
+            y_mean = np.mean(y_values)
+            y_std = np.std(y_values)
+            x_mean = np.mean(x_values)
+            x_std = np.std(x_values)
+            alpha = 2.0
 
-        y_mean = np.mean(y_values)
-        y_std = np.std(y_values)
-        x_mean = np.mean(x_values)
-        x_std = np.std(x_values)
-        alpha = 2.0
+            valid_mask = (z_values > (origin[2] - 5)) & \
+                         (y_values < (y_mean + alpha * y_std)) & (y_values > (y_mean - alpha * y_std)) & \
+                         (x_values < (x_mean + alpha * x_std)) & (x_values > (x_mean - alpha * x_std))
 
-        valid_mask = (z_values > (origin[2] - 5)) & \
-                     (y_values < (y_mean + alpha * y_std)) & (y_values > (y_mean - alpha * y_std)) & \
-                     (x_values < (x_mean + alpha * x_std)) & (x_values > (x_mean - alpha * x_std))
-
-        # Apply the mask to filter points
-        vertices_np_cleaned = vertices_np[valid_mask]
+            # Apply the mask to filter points
+            vertices_np_cleaned = vertices_np[valid_mask]
+        else:
+            vertices_np_cleaned = vertices_np
+            valid_mask = 0
 
         points, idx = self.sampling_fn(vertices_np_cleaned, self.args.n_centroids, self.args.nsamples)
 
@@ -91,7 +94,13 @@ class TeethSegmentationDataset(Dataset):
     def __getitem__(self, idx):
         bmesh_path, label_path = self.data_list[idx]
 
+        labels, jaw = self._load_labels(label_path)
         vertices, idx, valid_mask = self._load_bmesh_file(bmesh_path)
+
+        if self.args.clean:
+            labels = torch.tensor(labels[valid_mask][idx], dtype=torch.long)
+        else:
+            labels = torch.tensor(labels[idx], dtype=torch.long)
 
         if self.transform:
             vertices = random_rigid_transform(vertices)
@@ -99,8 +108,6 @@ class TeethSegmentationDataset(Dataset):
         # Convert vertices to a PyTorch tensor and apply the view transformation
         vertices = torch.tensor(vertices, dtype=torch.float32).view(-1, 3)
 
-        labels, jaw = self._load_labels(label_path)
-        labels = torch.tensor(labels[valid_mask][idx], dtype=torch.long)
         return vertices.view(-1, 3), labels.view(-1), jaw
 
 # Usage of the dataset
