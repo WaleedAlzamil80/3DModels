@@ -11,3 +11,4 @@ torchvision==0.18.1
 tqdm==4.66.4
 transformers==4.44.1
 trimesh==4.4.4
+fastmesh==0.1.0

@@ -55,13 +55,13 @@ def train(model, train_loader, test_loader, args):
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
             vertices = vertices.to(device)
-            verticesT = apply_random_transformation(vertices)
+            verticesTransformed = apply_random_transformation(vertices)
 
             # Forward pass
-            tin = model(verticesT.transpose(1, 2).unsqueeze(3))
-            vertices = torch.bmm(verticesT, tin)
+            tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
+            verticesTransformed = torch.bmm(verticesTransformed, tin)
 
-            loss = criterion(verticesT, vertices)
+            loss = criterion(verticesTransformed, vertices)
             cum_loss += loss.item()
 
             # Zero the parameter gradients
@@ -82,13 +82,13 @@ def train(model, train_loader, test_loader, args):
         with torch.no_grad():
             for vertices, labels, jaw in tqdm(test_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
                 vertices = vertices.to(device)
-                verticesT = apply_random_transformation(vertices)
+                verticesTransformed = apply_random_transformation(vertices)
 
                 # Forward pass
-                tin = model(verticesT.transpose(1, 2).unsqueeze(3))
-                vertices = torch.bmm(verticesT, tin)
+                tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
+                verticesTransformed = torch.bmm(verticesTransformed, tin)
 
-                t_loss += criterion(verticesT, vertices).item()
+                t_loss += criterion(verticesTransformed, vertices).item()
 
         t_loss /= len(test_loader)
 
