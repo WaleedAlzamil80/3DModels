@@ -9,8 +9,8 @@ cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
 
 # Function to generate a random rotation matrix
-def random_rotation_matrix(batch_size, device='cpu'):
-    angles = (torch.rand(batch_size, 3, device=device) * 2 - 1) * math.pi
+def random_rotation_matrix(batch_size, rotat=0.25, device='cpu'):
+    angles = (torch.rand(batch_size, 3, device=device) * 2 - 1) * math.pi * rotat
     cos, sin = torch.cos(angles), torch.sin(angles)
 
     # Rotation matrices for each axis
@@ -27,13 +27,13 @@ def random_rotation_matrix(batch_size, device='cpu'):
     return R
 
 # Function to apply random rigid transformation
-def apply_random_transformation(points):
+def apply_random_transformation(points, rotat = 0.25, trans = 0.5):
     batch_size, num_points, _ = points.shape
     device = points.device
 
     # Generate random rotations and translations
-    R = random_rotation_matrix(batch_size, device=device)  # Shape: (batch_size, 3, 3)
-    t = torch.rand(batch_size, 1, 3, device=device) * 2 - 1  # Shape: (batch_size, 1, 3), range [-1, 1]
+    R = random_rotation_matrix(batch_size, totat = rotat, device=device)  # Shape: (batch_size, 3, 3)
+    t = (torch.rand(batch_size, 1, 3, device=device) * 2 - 1) * trans  # Shape: (batch_size, 1, 3), range [-trans, trans]
 
     # Apply the transformation
     transformed_points = torch.bmm(points, R.transpose(1, 2)) + t  # (batch_size, num_points, 3)
@@ -48,6 +48,7 @@ def train(model, train_loader, test_loader, args):
 
     criterion = get_loss(args.loss)
     optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones = [5*(i+1) for i in range(50)], gamma = args.gamma)
 
     for epoch in range(args.num_epochs):
         cum_loss = 0
@@ -55,7 +56,7 @@ def train(model, train_loader, test_loader, args):
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
             vertices = vertices.to(device)
-            verticesTransformed = apply_random_transformation(vertices)
+            verticesTransformed = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
 
             # Forward pass
             tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
@@ -70,6 +71,8 @@ def train(model, train_loader, test_loader, args):
             # Backward pass and optimize
             loss.backward()
             optimizer.step()
+
+        scheduler.step()
 
         # Calculate average loss
         cum_loss /= len(train_loader)
