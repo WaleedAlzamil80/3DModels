@@ -1,7 +1,6 @@
-from losses.Dice_Focal_losses import DiceLoss, FocalLoss
+from losses.Dice_Focal_losses import DiceLoss, FocalLoss, CrossEntropy
 from losses.evalMetrics.chamferDistance import ChamferLoss
 from losses.evalMetrics.HausdorffDistance import HausdorffLoss
-from torch.nn import CrossEntropyLoss
 
 # Dictionary that maps model names to model classes
 LOSS_FACTORY = {
@@ -9,7 +8,7 @@ LOSS_FACTORY = {
     "chamfer": ChamferLoss,
     "focal": FocalLoss,
     "dice": DiceLoss,
-    "crossentropy": CrossEntropyLoss,
+    "crossentropy": CrossEntropy,
 }
 
 def get_loss(name, **kwargs):

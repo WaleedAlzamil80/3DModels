@@ -42,12 +42,11 @@ def train(model, train_loader, test_loader, args):
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
-            vertices, labels, jaw = vertices.to(device), labels.to(device).view(-1), jaw.to(device)
+            vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 
             # Forward pass
             outputs, tin = model(vertices, jaw)
 
-            outputs = outputs.reshape(-1, args.k)
             rtin = tnet_regularization(tin)
             loss = criterion(outputs, labels) + rtin
             cum_loss += (loss.item() + rtin.item())
@@ -60,14 +59,14 @@ def train(model, train_loader, test_loader, args):
             optimizer.step()
 
             # Get predictions and true labels
-            _, preds = torch.max(outputs, 1)
+            _, preds = torch.max(outputs, 2)
 
             train_miou_e.append(compute_mIoU(preds.reshape(-1, args.n_centroids*args.nsamples), labels.reshape(-1, args.n_centroids*args.nsamples), args.k))
             train_acc_e.append(compute_mean_per_class_accuracy(preds.reshape(-1, args.n_centroids*args.nsamples), labels.reshape(-1, args.n_centroids*args.nsamples), args.k))
 
             # Append metric  and loss to lists
-            train_labels.extend(labels.cpu().numpy())
-            train_preds.extend(preds.cpu().numpy())
+            train_labels.extend(labels.view(-1).cpu().numpy())
+            train_preds.extend(preds.view(-1).cpu().numpy())
 
         # Calculate metrics
         train_epoch_accuracy = accuracy_score(train_labels, train_preds)
@@ -87,21 +86,20 @@ def train(model, train_loader, test_loader, args):
 
         with torch.no_grad():
             for vertices, labels, jaw in tqdm(test_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
-                vertices, labels, jaw = vertices.to(device), labels.to(device).view(-1), jaw.to(device)
+                vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 
                 # Forward pass
                 outputs, tin = model(vertices, jaw)
 
-                outputs = outputs.reshape(-1, args.k)
                 t_loss += criterion(outputs, labels).item() + tnet_regularization(tin).item()
 
                 # Get predictions and true labels
-                _, preds = torch.max(outputs, 1)
+                _, preds = torch.max(outputs, 2)
                 test_miou_e.append(compute_mIoU(preds.reshape(-1, args.n_centroids*args.nsamples), labels.reshape(-1, args.n_centroids*args.nsamples), args.k))
                 test_acc_e.append(compute_mean_per_class_accuracy(preds.reshape(-1, args.n_centroids*args.nsamples), labels.reshape(-1, args.n_centroids*args.nsamples), args.k))
 
-                test_labels.extend(labels.cpu().numpy())
-                test_preds.extend(preds.cpu().numpy())
+                test_labels.extend(labels.view(-1).cpu().numpy())
+                test_preds.extend(preds.view(-1).cpu().numpy())
 
         # Calculate metrics
         test_epoch_accuracy = accuracy_score(test_labels, test_preds)
