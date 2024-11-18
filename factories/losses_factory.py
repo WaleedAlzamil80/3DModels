@@ -1,11 +1,12 @@
 from losses.Dice_Focal_losses import DiceLoss, FocalLoss, CrossEntropy
-from losses.evalMetrics.chamferDistance import ChamferLoss
+from losses.evalMetrics.chamferDistance import ChamferLoss, DistanceDk
 from losses.evalMetrics.HausdorffDistance import HausdorffLoss
 
 # Dictionary that maps model names to model classes
 LOSS_FACTORY = {
     "hausdorff": HausdorffLoss,
     "chamfer": ChamferLoss,
+    "l2": DistanceDk,
     "focal": FocalLoss,
     "dice": DiceLoss,
     "crossentropy": CrossEntropy,

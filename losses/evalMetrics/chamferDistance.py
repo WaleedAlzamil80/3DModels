@@ -31,3 +31,20 @@ class ChamferLoss(nn.Module):
         chamfer_dist = (p1_to_p2.mean(dim=-1) + p2_to_p1.mean(dim=-1)).mean()
 
         return chamfer_dist
+
+
+class DistanceDk(nn.Module):
+    def __init__(self):
+        super(DistanceDk, self).__init__()
+ 
+    def forward(self, p1, p2):
+        """
+        Compute the Squared Distance between two point clouds.
+        Args:
+            p1 (torch.Tensor): Point cloud of shape (B, N, 3).
+            p2 (torch.Tensor): Point cloud of shape (B, N, 3).
+        Returns:
+            torch.Tensor: Squared Distance as a loss value.
+        """
+
+        return torch.sum((p1 - p2) ** 2, dim=-1).mean(dim=-1).mean()

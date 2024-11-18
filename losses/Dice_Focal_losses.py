@@ -24,6 +24,7 @@ class FocalLoss(nn.Module):
         focal_loss = self.alpha * (1 - pt.view(-1)) ** self.gamma * ce_loss
         return focal_loss.mean()
 
+
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1):
         super(DiceLoss, self).__init__()
@@ -50,6 +51,7 @@ class CrossEntropy(nn.Module):
 
     def forward(self, preds, labels):
         return self.cross_entropy(preds.reshape(-1, preds.shape[-1]), labels.view(-1))
+
 
 def combined_loss(preds, labels):
     ce_loss = nn.CrossEntropyLoss()(preds, labels)
