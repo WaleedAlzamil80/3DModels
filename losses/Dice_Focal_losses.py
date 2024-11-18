@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 class FocalLoss(nn.Module):
     def __init__(self, gamma=2, alpha=0.25):
@@ -9,10 +10,20 @@ class FocalLoss(nn.Module):
 
     def forward(self, preds, labels):
         ce_loss = nn.CrossEntropyLoss()(preds, labels)
-        pt = torch.exp(-ce_loss)
+
+        # Compute softmax probabilities
+        probs = F.softmax(preds, dim=1)
+        labels_one_hot = F.one_hot(labels, num_classes=preds.size(1)).permute(0, 2, 1).float()
+
+        # Gather probabilities for the true class
+        pt = torch.sum(probs * labels_one_hot, dim=1)  # [batch_size, num_points]
+
+        # Compute Cross-Entropy Loss
+        ce_loss = F.cross_entropy(preds, labels, reduction='none')  # [batch_size, num_points]
+
+        # Compute Focal Loss
         focal_loss = self.alpha * (1 - pt) ** self.gamma * ce_loss
         return focal_loss.mean()
-
 
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1):
