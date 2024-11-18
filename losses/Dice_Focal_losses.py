@@ -18,7 +18,7 @@ class FocalLoss(nn.Module):
         pt = torch.sum(probs * labels_one_hot, dim=2)  # [batch_size, num_points]
 
         # Compute Cross-Entropy Loss
-        ce_loss = F.cross_entropy(preds.reshape(-1, preds.shape[2]), labels.view(-1), reduction='none')  # [batch_size, num_points]
+        ce_loss = F.cross_entropy(preds.reshape(-1, preds.shape[2]), labels.view(-1), reduction='none')
 
         # Compute Focal Loss
         focal_loss = self.alpha * (1 - pt.view(-1)) ** self.gamma * ce_loss

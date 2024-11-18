@@ -48,3 +48,14 @@ class DistanceDk(nn.Module):
         """
 
         return torch.sum((p1 - p2) ** 2, dim=-1).mean(dim=-1).mean()
+
+
+class chamferDk(nn.Module):
+    def __init__(self, alpha = 0.5):
+        super(chamferDk, self).__init__()
+        self.l2 = DistanceDk()
+        self.chamfer = ChamferLoss()
+        self.alpha = alpha
+
+    def forward(self, preds, labels):
+        return self.alpha * self.chamfer(preds, labels) + (1 - self.alpha) * self.l2(preds, labels)
