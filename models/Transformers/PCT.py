@@ -154,7 +154,7 @@ class PCTsegmentation(nn.Module):
 
         x = self.lbrd1(x.unsqueeze(2))
         x = self.lbrd2(x)
-        x = self.linear(x.permute(0, 3, 2, 1)).squeeze(2) # B, N, k
+        x = self.linear(x.permute(0, 3, 2, 1)).permute(0, 3, 2, 1).squeeze(2) # B, N, k
 
         return x
 
