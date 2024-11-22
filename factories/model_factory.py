@@ -15,6 +15,7 @@ MODEL_FACTORY = {
     "DynamicGraphCNN": DGCNN,
     "SpatialTransformer": TNetkd,
     "PCT": PCTransformer,
+    "PCTGeometryAware":PCTransformer,
 }
 
 def get_model(name, **kwargs):

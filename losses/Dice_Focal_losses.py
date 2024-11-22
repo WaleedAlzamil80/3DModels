@@ -53,7 +53,11 @@ class CrossEntropy(nn.Module):
         return self.cross_entropy(preds.reshape(-1, preds.shape[-1]), labels.view(-1))
 
 
-def combined_loss(preds, labels):
-    ce_loss = nn.CrossEntropyLoss()(preds, labels)
-    d_loss = DiceLoss()(preds, labels)
-    return ce_loss + d_loss
+class FocalEntropy(nn.Module):
+    def __init__(self, gamma=2, alpha=0.25):
+        super(FocalEntropy, self).__init__()
+        self.cross_entropy = CrossEntropy()
+        self.focal = FocalLoss(gamma=gamma, alpha=alpha)
+
+    def forward(self, preds, labels):
+        return (self.cross_entropy(preds, labels) + self.focal(preds, labels)) / 2

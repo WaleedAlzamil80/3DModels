@@ -1,4 +1,4 @@
-from losses.Dice_Focal_losses import DiceLoss, FocalLoss, CrossEntropy
+from losses.Dice_Focal_losses import DiceLoss, FocalLoss, CrossEntropy, FocalEntropy
 from losses.evalMetrics.chamferDistance import ChamferLoss, DistanceDk, chamferDk
 from losses.evalMetrics.HausdorffDistance import HausdorffLoss
 
@@ -9,6 +9,7 @@ LOSS_FACTORY = {
     "l2": DistanceDk,
     "chamfer_l2": chamferDk,
     "focal": FocalLoss,
+    "focal_entropy": FocalEntropy,
     "dice": DiceLoss,
     "crossentropy": CrossEntropy,
 }

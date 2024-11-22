@@ -1,6 +1,7 @@
 from train.train_pointnet import train as pointnetTrain
 from train.train_dgcnn import train as graphTrain
 from train.train_sp import train as sptrain
+from train.train_pct import train as pctTrain
 
 # Factory to choose the suitable training Loop use args
 TRAIN_FACTORY = {
@@ -10,6 +11,7 @@ TRAIN_FACTORY = {
     "FoldingNet": graphTrain,
     "SpatialTransformer": sptrain,
     "DynamicGraphCNN": graphTrain,
+    "PCT": graphTrain,
 }
 
 def get_train(model, *args, **kwargs):

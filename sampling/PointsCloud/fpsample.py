@@ -7,7 +7,7 @@ def k_nearest_neighbors_optimized(points, centroids, k):
 
     # Query KD-Tree to find the k-nearest neighbors for each centroid
     _, knn_indices = kdtree.query(centroids, k=k)
-
+ 
     return points[knn_indices], knn_indices
 
 # fpsample (from PyPI) 

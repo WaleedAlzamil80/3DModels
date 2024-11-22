@@ -103,3 +103,32 @@ def kdneighGPU(x, args):
     neighborsF = torch.stack(neighborsF)
 
     return edge_features, neighborsF
+
+def compute_local_covariance(points):
+    """
+    Compute the local covariance matrix for each point cloud.
+
+    Args:
+        points: Tensor of shape [batch_size, num_points, k_nearest, 3].
+
+    Returns:
+        covariances: Tensor of shape [batch_size, num_points, 9].
+    """
+    # Calculate mean across neighbors (dim=-2)
+    means = points.mean(dim=-2, keepdim=True)  # Shape: [batch_size, num_points, 1, 3]
+    
+    # Subtract mean from neighbors
+    centered_points = points - means  # Shape: [batch_size, num_points, k_nearest, 3]
+    
+    # Compute outer product of centered points (batched matrix multiplication)
+    # Reshape centered points for bmm
+    centered_points_flat = centered_points.view(-1, points.size(-2), points.size(-1))  # Shape: [B*num_points, k_nearest, 3]
+    cov_matrices = torch.bmm(centered_points_flat.transpose(1, 2), centered_points_flat)  # Shape: [B*num_points, 3, 3]
+    
+    # Normalize by the number of neighbors (k_nearest)
+    cov_matrices /= points.size(-2)  # Normalize by K
+    
+    # Reshape back to batch structure and flatten the 3x3 matrix
+    cov_matrices = cov_matrices.view(points.size(0), points.size(1), 9)  # Shape: [batch_size, num_points, 9]
+    
+    return cov_matrices
