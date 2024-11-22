@@ -11,7 +11,7 @@ TRAIN_FACTORY = {
     "FoldingNet": graphTrain,
     "SpatialTransformer": sptrain,
     "DynamicGraphCNN": graphTrain,
-    "PCT": graphTrain,
+    "PCT": pctTrain,
 }
 
 def get_train(model, *args, **kwargs):
