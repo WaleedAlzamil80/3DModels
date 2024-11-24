@@ -81,7 +81,7 @@ def SegmentGenerate(vertices_np, jaw=0, model_name="DynamicGraphCNN", mode="segm
 
     # Perform segmentation using the model
     if mode != "generation":
-        output = model(vertices, jaw)
+        output = model(vertices, jaw)[0]
         output = torch.max(output, dim=2)[1].cpu().detach().numpy()
     else:
         output = model(vertices)

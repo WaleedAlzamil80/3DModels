@@ -5,7 +5,6 @@ import json
 import numpy as np
 import fastmesh as fm
 from factories.sampling_factory import get_sampling_technique
-from ..transformations.rigid import random_rigid_transform
 
 class TeethSegmentationDataset(Dataset):
     def __init__(self, split='train',  transform=None, p=7, args = None):
@@ -103,9 +102,6 @@ class TeethSegmentationDataset(Dataset):
         else:
             labels = torch.tensor(labels[idx], dtype=torch.long)
 
-        if self.transform:
-            vertices = random_rigid_transform(vertices)
-
         # Convert vertices to a PyTorch tensor and apply the view transformation
         vertices = torch.tensor(vertices, dtype=torch.float32).view(-1, 3)
 
@@ -114,8 +110,8 @@ class TeethSegmentationDataset(Dataset):
 # Usage of the dataset
 def OSF_data_loaders(args):
     # Create training and testing datasets
-    train_dataset = TeethSegmentationDataset(split='train', transform=args.rigid_augmentation_train, p=args.p, args=args)
-    test_dataset = TeethSegmentationDataset(split='test', transform=args.rigid_augmentation_test, p=args.p, args=args)
+    train_dataset = TeethSegmentationDataset(split='train', p=args.p, args=args)
+    test_dataset = TeethSegmentationDataset(split='test', p=args.p, args=args)
 
     # Create DataLoader for both
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)

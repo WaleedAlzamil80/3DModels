@@ -10,7 +10,6 @@ from sklearn.metrics import accuracy_score
 from utils.helpful import print_trainable_parameters
 from metrics.meanAccClass import compute_mean_per_class_accuracy
 from metrics.mIOU import compute_mIoU
-from vis.visulizeGrouped import visualize_with_trimesh
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
