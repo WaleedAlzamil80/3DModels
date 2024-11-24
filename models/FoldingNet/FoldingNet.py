@@ -81,7 +81,7 @@ class FBDecoder(nn.Module):
 
     def forward(self, codeword):  # B, 1, C
         codeword = codeword.expand(-1, self.grid.shape[0], -1) # B, M, C
-        x = torch.cat([codeword, self.grid.unsqueeze(0).expand(codeword.shape[0], -1, -1)], dim = 2) # B, M, Cnew
+        x = torch.cat([codeword, self.grid.to(codeword.device).unsqueeze(0).expand(codeword.shape[0], -1, -1)], dim = 2) # B, M, Cnew
         x = self.fold1(x.permute(0, 2, 1)).permute(0, 2, 1) # B, M, 3
         x = torch.cat([x, codeword], dim = 2) # B, M, Cnew2
         x = self.fold2(x.permute(0, 2, 1)).permute(0, 2, 1) # B, M, 3

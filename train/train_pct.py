@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 from factories.losses_factory import get_loss
+from rigidTransformations import apply_random_transformation
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 from utils.helpful import print_trainable_parameters
@@ -40,6 +41,9 @@ def train(model, train_loader, test_loader, args):
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
             vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
+
+            if args.rigid_augmentation_train:
+                vertices = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
 
             # Forward pass
             outputs = model(vertices, jaw)
@@ -83,6 +87,9 @@ def train(model, train_loader, test_loader, args):
         with torch.no_grad():
             for vertices, labels, jaw in tqdm(test_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
                 vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
+
+                if args.rigid_augmentation_test:
+                    vertices = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
 
                 # Forward pass
                 outputs = model(vertices, jaw)

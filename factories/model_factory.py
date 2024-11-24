@@ -4,6 +4,7 @@ from models.GraphCNN.DGCNN import DGCNN
 
 from models.FoldingNet.Mining import GaussianKernelConv
 from models.FoldingNet.FoldingNet import FoldingNet
+
 from models.Transformers.PCT import PCTransformer
 
 # Dictionary that maps model names to model classes
