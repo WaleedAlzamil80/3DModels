@@ -3,6 +3,7 @@ import torch
 import math
 from factories.losses_factory import get_loss
 from rigidTransformations import apply_random_transformation
+from losses.RegularizarionPointNet import tnet_regularization
 from tqdm import tqdm
 from utils.helpful import print_trainable_parameters
 
@@ -31,8 +32,11 @@ def train(model, train_loader, test_loader, args):
             # Forward pass
             tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
             verticesTransformed = torch.bmm(verticesTransformed, tin)
+            # disvt = torch.cdist(verticesTransformed, verticesTransformed)
+            # disv = torch.cdist(vertices, vertices)
+            # pairwise_difference = torch.mean(torch.abs(disv-disvt), dim=(1,2))
 
-            loss = criterion(verticesTransformed, vertices)
+            loss = criterion(verticesTransformed, vertices) + tnet_regularization(tin) # + pairwise_difference # + Orthogonality_Loss
             cum_loss += loss.item()
 
             # Zero the parameter gradients
@@ -61,7 +65,11 @@ def train(model, train_loader, test_loader, args):
                 tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
                 verticesTransformed = torch.bmm(verticesTransformed, tin)
 
-                t_loss += criterion(verticesTransformed, vertices).item()
+                # disvt = torch.cdist(verticesTransformed, verticesTransformed)
+                # disv = torch.cdist(vertices, vertices)
+                # pairwise_difference = torch.mean(torch.abs(disv-disvt), dim=(1,2))
+
+                t_loss += (criterion(verticesTransformed, vertices).item() + tnet_regularization(tin).item()) # + pairwise_difference.item())
 
         t_loss /= len(test_loader)
 

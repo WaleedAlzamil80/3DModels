@@ -4,10 +4,12 @@ from losses.evalMetrics.HausdorffDistance import HausdorffLoss
 
 # Dictionary that maps model names to model classes
 LOSS_FACTORY = {
+    ###### Generation Losses
     "hausdorff": HausdorffLoss,
     "chamfer": ChamferLoss,
     "l2": DistanceDk,
     "chamfer_l2": chamferDk,
+    ###### Segmentation Losses
     "focal": FocalLoss,
     "focal_entropy": FocalEntropy,
     "dice": DiceLoss,

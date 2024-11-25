@@ -26,8 +26,8 @@ def apply_random_transformation(points, rotat = 0.25, trans = 0.5):
 
     # Generate random rotations and translations
     R = random_rotation_matrix(batch_size, rotat = rotat, device=device)  # Shape: (batch_size, 3, 3)
-    t = (torch.rand(batch_size, 1, 3, device=device) * 2 - 1) * trans  # Shape: (batch_size, 1, 3), range [-trans, trans]
+    # t = (torch.rand(batch_size, 1, 3, device=device) * 2 - 1) * trans  # Shape: (batch_size, 1, 3), range [-trans, trans]
 
     # Apply the transformation
-    transformed_points = torch.bmm(points, R.transpose(1, 2)) + t  # (batch_size, num_points, 3)
+    transformed_points = torch.bmm(points, R.transpose(1, 2)) # + t  # (batch_size, num_points, 3)
     return transformed_points
