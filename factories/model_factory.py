@@ -1,5 +1,6 @@
 from models.PointNetpp.PointNet2d import PointNet, TNetkd
 from models.PointNetpp.PointNetPP import PointNetpp
+from models.PointNetpp.SPwGKL import TNetkd as TNmod
 from models.GraphCNN.DGCNN import DGCNN
 
 from models.FoldingNet.Mining import GaussianKernelConv
@@ -15,6 +16,7 @@ MODEL_FACTORY = {
     "FoldingNet": FoldingNet,
     "DynamicGraphCNN": DGCNN,
     "SpatialTransformer": TNetkd,
+    "SpatialTransformer_v2": TNmod,
     "PCT": PCTransformer,
     "PCTGeometryAware":PCTransformer,
 }

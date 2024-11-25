@@ -10,6 +10,7 @@ TRAIN_FACTORY = {
     "KCNet": graphTrain,
     "FoldingNet": graphTrain,
     "SpatialTransformer": sptrain,
+    "SpatialTransformer_v2": sptrain,
     "DynamicGraphCNN": graphTrain,
     "PCT": pctTrain,
 }
