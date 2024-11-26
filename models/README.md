@@ -46,8 +46,7 @@ The Point Cloud Transformer adapts the transformer architecture for 3D point clo
 - **Paper**: [PCT: Point Cloud Transformer](https://arxiv.org/abs/2012.09688)
 - **Current Implementation**: PCT is successfully integrated, focusing on segmentation tasks with attention-based feature extraction.
 
-![PCT](/images/PCT/PCTarchitecture.png)
-
+![PCT](/images/transformers/PCT/PCTArchitecture.png)
 ---
 
 ### 5. Mining Point Cloud
@@ -56,7 +55,7 @@ This model explores techniques for data mining and feature extraction in point c
 - **Paper**: [Mining Point Cloud Local Structures by Kernel Correlation and Graph Pooling](https://arxiv.org/pdf/1712.06760)
 - **Current Implementation**: FoldingNet is implemented as a standalone feature extractor and has been used with the Spatial Transformer introduced in the PointNet paper.
 
-![Mining Point Cloud](/images/MiningPointCloud.png)
+![Mining Point Cloud](/images/Graphs/MiningPointCloud.png)
 
 ---
 
