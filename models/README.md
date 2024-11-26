@@ -10,7 +10,7 @@ PointNet is a deep learning architecture designed for directly processing 3D poi
 - **Paper**: [PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation](https://arxiv.org/abs/1612.00593)
 - **Current Implementation**: The current version implements PointNet for 3D teeth segmentation, focusing on direct feature extraction from point clouds.
 
-![PointNet](images/PointNet/PointNet.png)
+![PointNet](/images/PointNet/PointNet.png)
 
 ---
 
@@ -23,7 +23,7 @@ PointNet++ builds upon the foundation of PointNet by introducing hierarchical fe
   - Multi-scale grouping (MSG)
   - Multi-resolution grouping (MRG)
 
-![PointNet++](images/PointNet/PointNetpp.png)
+![PointNet++](/images/PointNet/PointNetpp.png)
 
 ---
 
@@ -36,7 +36,7 @@ DynamicGraphCNN (DGCNN) is a graph-based neural network for 3D point cloud proce
   - Optimization for large-scale datasets
   - Improved memory efficiency
 
-![DynamicGraphCNN](images/Graphs/DynamicGraphCNN.png)
+![DynamicGraphCNN](/images/Graphs/DynamicGraphCNN.png)
 
 ---
 
@@ -46,7 +46,7 @@ The Point Cloud Transformer adapts the transformer architecture for 3D point clo
 - **Paper**: [PCT: Point Cloud Transformer](https://arxiv.org/abs/2012.09688)
 - **Current Implementation**: PCT is successfully integrated, focusing on segmentation tasks with attention-based feature extraction.
 
-![PCT](images/PCT/PCTarchitecture.png)
+![PCT](/images/PCT/PCTarchitecture.png)
 
 ---
 
@@ -56,7 +56,7 @@ This model explores techniques for data mining and feature extraction in point c
 - **Paper**: [Mining Point Cloud Local Structures by Kernel Correlation and Graph Pooling](https://arxiv.org/pdf/1712.06760)
 - **Current Implementation**: FoldingNet is implemented as a standalone feature extractor and has been used with the Spatial Transformer introduced in the PointNet paper.
 
-![Mining Point Cloud](images/MiningPointCloud.png)
+![Mining Point Cloud](/images/MiningPointCloud.png)
 
 ---
 
@@ -68,7 +68,7 @@ FoldingNet is an autoencoder designed for unsupervised feature learning on 3D po
 - **Future Enhancements**:
   - Integration with other attention mechanisms and DGCNN for crown generation
 
-![FoldingNet](images/Graphs/FoldingNet.png)
+![FoldingNet](/images/Graphs/FoldingNet.png)
 
 ---
 
