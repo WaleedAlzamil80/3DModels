@@ -8,7 +8,6 @@ from sklearn.metrics import accuracy_score
 from utils.helpful import print_trainable_parameters
 from metrics.meanAccClass import compute_mean_per_class_accuracy
 from metrics.mIOU import compute_mIoU
-from vis.visulizeGrouped import visualize_with_trimesh
 
 cuda = True if torch.cuda.is_available() else False
 device = 'cuda' if cuda else 'cpu'
@@ -40,11 +39,9 @@ def train(model, train_loader, test_loader, args):
         test_acc_e = []
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
-            visualize_with_trimesh(vertices[0], labels[0])
 
             if args.rigid_augmentation_train:
                 vertices = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
-            visualize_with_trimesh(vertices[0], labels[0])
 
             vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 
