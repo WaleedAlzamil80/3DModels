@@ -1,72 +1,29 @@
+# 3D Models for Segmentation and Generation  
 
-# 3D Models Repository
-
-The goal is to create a collection of different 3D models and pipelines that can be applied to similar tasks involving 3D point cloud data, meshes, or volumetric data.
-
-## Introduction
-This repository is dedicated to implementing and experimenting with various 3D models. The primary focus is on exploring different architectures for 3D data processing, such as PointNet, and applying them to real-world tasks like 3D teeth segmentation.
-
-This repository is focused on the implementation of various 3D model architectures and methods for processing point clouds and meshes. It currently supports the **PointNet** network, with plans to include other architectures like PointNet++, DGCNN, and MeshCNN in future updates.
-
----
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Implemented Models](#implemented-models)
-3. [Upcoming Features](#upcoming-features)
-4. [Installation](#installation)
-5. [Usage](#usage)
-6. [Dataset](#dataset)
-7. [Repository Structure](#repository-structure)
-8. [Contributing](#contributing)
-9. [License](#license)
-
----
-
-## Project Overview
-
+## Overview  
 This repository aims to provide implementations for several state-of-the-art neural networks designed to handle 3D data. The focus is on point clouds and meshes, widely used in various domains like computer vision, robotics, and medical imaging.
 
-The repository is structured to allow easy integration of additional methods and architectures. The current implementation includes **PointNet**, a popular neural network model for point cloud data classification and segmentation.
+The primary focus is currently on **segmentation**, implementing 3D models tailored for **teeth segmentation** and **crown generation** tasks, with generation tasks to be addressed in future development phases.
 
-## Implemented Models
+## Features  
+- Implementation of 3D segmentation models for dental applications.  
+- Modular design for model creation, training, and evaluation.  
+- Tools for dataset preprocessing, sampling, and visualization.  
 
-- **PointNet**: 
-  - **Description**: PointNet is a pioneering architecture for directly processing point clouds. It is used for tasks like classification and segmentation of 3D data.
-  - **Files**:
-    - `models/PointNet.py`: Contains the implementation of the PointNet architecture.
-    - `train.py`: Training script for the PointNet model.
-    - `test_PointNet.py`: Testing and evaluation script for PointNet.
-    - `losses/PointNetLosses.py`: Custom loss functions for PointNet.
-  - [Architecture](images/PointNet.png)
+## Directory Structure  
 
-- **PointNet++**:
-  - **Description**: PointNet++ builds on PointNet by incorporating hierarchical learning, capturing local structures at various scales. It's more suited for complex 3D tasks like segmentation and dense prediction.
-  - **Files**:
-      - `models/PointNetPP.py`: Contains the implementation of the PointNet++ architecture.
-      - `train.py`: Training script for the PointNet++ model (same script as in PointNet).
-      - `test_PointNetPP.py`: Testing and evaluation script for PointNet++.
-      - `losses/PointNetLosses.py`: Losses the same as PointNet.
-  - [Architecture](images/PointNetpp.png)
-
-## Upcoming Features
-
-- **Add more 3D models**: Future implementations may include architectures like DGCNN, and 3D CNNs for point cloud and mesh data.
-- **Improve segmentation results**: Fine-tune the models to enhance segmentation performance on the teeth dataset and Shapenet.
-- **Expand dataset**: Experiment with other 3D datasets and tasks.
-
-
-We plan to add the following models and architectures in future updates:
-
-- **PointNet++**
-- **DGCNN** (Dynamic Graph CNN)
-- **MeshCNN**
-- **PCT** (Point Cloud Transformer)
-- **PointTe**
-- **SO-Net**
-- **GCN for meshes**
-- **3D GAN architectures**
+- **`main.py`**: The main script to train or test models.  
+- **`requirements.txt`**: Lists all Python dependencies.  
+- **`Dataset/`**: Code and utilities for loading and preprocessing datasets.  
+- **`models/`**: Contains model architectures for segmentation and future generation tasks.  
+- **`train/`**: Training loops and scripts.  
+- **`losses/`**: Custom loss functions for segmentation tasks.  
+- **`metrics/`**: Evaluation metrics for segmentation performance.  
+- **`utils/`**: Utility functions for logging, debugging, etc.  
+- **`config/`**: Configuration files for setting up experiments.  
+- **`vis/`**: Visualization tools for outputs and intermediate results.  
+- **`sampling/`**: Functions for augmenting and sampling datasets.  
+- **`images/`**: Contains visualizations or example outputs.  
 
 ## Installation
 
@@ -103,7 +60,7 @@ pip install torch torchvision numpy scikit-learn trimesh
 
 ## Usage
 
-### Training the PointNet Model
+### Training
 
 To train the PointNet model on a dataset, use the `train.py` script:
 
@@ -112,25 +69,6 @@ python train.py --dataset /path/to/dataset --epochs 50 --batch_size 32
 ```
 
 You can customize the training configuration by modifying the arguments like dataset path, number of epochs, and batch size.
-
-
-## Repository Structure
-
-```plaintext
-.
-├── Dataset/                   # Directory for custom datasets
-├── images/                    # Contains visual assets for documentation
-├── losses/                    # Custom loss functions
-├── models/                    # Neural network architectures
-├── utils/                     # Utility scripts for dataset preparation, etc.
-├── vis/                       # Visualization scripts (plots, etc.)
-├── environment.sh             # Bash script for setting up environment
-├── main.py                    # Main entry script (if applicable)
-├── README.md                  # Project documentation
-├── requirements.txt           # Python dependencies
-├── test_PointNet.py           # Testing script for PointNet
-└── train.py                   # Training script
-```
 
 ## Contributing
 
@@ -142,6 +80,14 @@ Contributions are welcome! Feel free to open issues or submit pull requests if y
 3. **Environment Setup**: If you have a more complex setup or additional environment scripts (e.g., for GPU configurations), include those details in the installation instructions.
 
 Feel free to adjust this template to match the exact specifics of your project!
+
+## Future Work  
+- Crown generation models and tools.  
+- Enhanced visualization and post-processing methods.  
+- Integration with other dental datasets for generalizability.  
+- Future implementations may include more advanced architectures.
+- Experiment with other 3D datasets and tasks.
+- Fine-tune the models to enhance segmentation performance on the teeth dataset and other datasets.
 
 ## License
 
