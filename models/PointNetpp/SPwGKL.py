@@ -15,14 +15,15 @@ class TNetkd(nn.Module):
         self.input=input
         self.edgeconv1 = EdgeConv(self.input, [mlp[0], mlp[0]])
         self.edgeconv2 = EdgeConv(mlp[0], [mlp[1], mlp[1]])
-        self.edgeconv3 = EdgeConv(2*mlp[1], [mlp[2], mlp[2]])
+        self.conv1 = nn.Conv2d(2*mlp[1], mlp[2], kernel_size=1, bias=False)
 
-        self.conv1 = nn.Conv2d(in_channels=mlp[2], out_channels=mlp[3], kernel_size=1, bias=False)
-        self.conv2 = nn.Conv2d(in_channels=mlp[3], out_channels=mlp[4], kernel_size=1, bias=False)
-        self.conv3 = nn.Conv2d(in_channels=mlp[4], out_channels=self.input*self.input, kernel_size=1, bias=False)
+        self.conv2 = nn.Conv2d(in_channels=mlp[2], out_channels=mlp[3], kernel_size=1, bias=False)
+        self.conv3 = nn.Conv2d(in_channels=mlp[3], out_channels=mlp[4], kernel_size=1, bias=False)
+        self.conv4 = nn.Conv2d(in_channels=mlp[4], out_channels=self.input*self.input, kernel_size=1, bias=False)
 
-        self.bn1 = nn.BatchNorm2d(num_features=mlp[3])
-        self.bn2 = nn.BatchNorm2d(num_features=mlp[4])
+        self.bn1 = nn.BatchNorm2d(num_features=mlp[2])
+        self.bn2 = nn.BatchNorm2d(num_features=mlp[3])
+        self.bn3 = nn.BatchNorm2d(num_features=mlp[4])
 
         self.relu = nn.LeakyReLU()
 
@@ -34,10 +35,10 @@ class TNetkd(nn.Module):
         x = self.edgeconv2(x)
         x = torch.cat([x.reshape(bs, -1, c, n), kernels.permute(0, 2, 1).reshape(bs, -1, c, n)], dim = 1)
 
-        x = self.edgeconv3(x.reshape(bs, c*n, -1)).reshape(bs, -1, c, n)
         x = self.relu(self.bn1(self.conv1(x)))                                       
         x = self.relu(self.bn2(self.conv2(x)))
-        x = self.conv3(x)                                                
+        x = self.relu(self.bn3(self.conv3(x)))                                       
+        x = self.conv4(x)                                                
 
         x = torch.max(x, dim=3, keepdim=False)[0]                                            # (B, k * k, C)
         x = torch.max(x, dim=2, keepdim=False)[0]                                            # (B, k * k)
