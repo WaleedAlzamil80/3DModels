@@ -13,7 +13,6 @@ TRAIN_FACTORY = {
     "SpatialTransformer_v2": sptrain,
     "DynamicGraphCNN": graphTrain,
     "PCT": pctTrain,
-    "PCTE": pctTrain,
 }
 
 def get_train(model, *args, **kwargs):

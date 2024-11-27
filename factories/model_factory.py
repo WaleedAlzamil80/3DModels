@@ -7,7 +7,6 @@ from models.FoldingNet.Mining import GaussianKernelConv
 from models.FoldingNet.FoldingNet import FoldingNet
 
 from models.Transformers.PCT import PCTransformer
-from models.Transformers.PCTE import PCTransformer as PCTE
 
 # Dictionary that maps model names to model classes
 MODEL_FACTORY = {
@@ -19,7 +18,6 @@ MODEL_FACTORY = {
     "SpatialTransformer": TNetkd,
     "SpatialTransformer_v2": TNmod,
     "PCT": PCTransformer,
-    "PCTE": PCTE,
     "PCTGeometryAware":PCTransformer,
 }
 
