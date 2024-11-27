@@ -1,10 +1,8 @@
-import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..PointNetpp.PointNet2d import TNetkd
 from sampling.PointsCloud.knn import kdneighGPU
-from vis.plot_pca import save_tsne
 
 import argparse
 
@@ -56,13 +54,9 @@ class DGCNNCls(nn.Module):
         x = torch.bmm(x, inT)
 
         x1 = self.edgeconv1(x)
-        save_tsne(x1[0], save_path="x1.png")
         x2 = self.edgeconv2(x1)
-        save_tsne(x2[0], save_path="x2.png")
         x3 = self.edgeconv3(x2)
-        save_tsne(x3[0], save_path="x3.png")
         x4 = self.edgeconv4(x3)
-        save_tsne(x4[0], save_path="x4.png")
 
         x = torch.cat([x1, x2, x3, x4], dim=2).permute(0, 2, 1)
         x = torch.max(x, dim = 2, keepdim=True)[0]
@@ -107,11 +101,8 @@ class DGCNNSeg(nn.Module):
         emb = self.conv_emb(emb).permute(0, 2, 1)
 
         x1 = self.edgeconv1(x)
-        save_tsne(x1[0], save_path="x1.png")
         x2 = self.edgeconv2(x1)
-        save_tsne(x2[0], save_path="x2.png")
         x3 = self.edgeconv3(x2)
-        save_tsne(x3[0], save_path="x3.png")
 
         x = torch.cat([x1, x2, x3], dim=2).permute(0, 2, 1)
         x = torch.max(x, dim = 2, keepdim=True)[0]
@@ -119,16 +110,11 @@ class DGCNNSeg(nn.Module):
         x = torch.cat([x, emb], dim=2)
 
         x = torch.cat([x.expand(x1.size(0), x1.size(1), -1), x1, x2, x3], dim=2).permute(0, 2, 1)
-        save_tsne(x[0].permute(1, 0), save_path="x4.png")
 
         x = self.relu(self.conv2(x))
-        save_tsne(x[0].permute(1, 0), save_path="x5.png")
         x = self.relu(self.conv3(x))
-        save_tsne(x[0].permute(1, 0), save_path="x6.png")
         x = self.relu(self.conv4(x))
-        save_tsne(x[0].permute(1, 0), save_path="x7.png")
         x = self.conv5(x).transpose(1, 2)
-        save_tsne(x[0], save_path="x7.png")
 
         return x, inT
 

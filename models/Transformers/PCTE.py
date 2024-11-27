@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from models.GraphCNN.DGCNN import EdgeConv 
 import argparse
 from sampling.PointsCloud.knn import kdneighGPU
 
@@ -14,7 +15,7 @@ class LBRD(nn.Module):
 
     def forward(self, x): # (B, N, k, De) -> (B, N, k, De)
         return self.D(self.R(self.B(self.L(x.permute(0, 3, 2, 1))))).permute(0, 3, 2, 1)
-
+ 
 
 class EmbeddingInput(nn.Module):
     def __init__(self, inchannels, outchannels):
@@ -43,7 +44,7 @@ class NeighborEmbedding(nn.Module):
 
         return x
 
- 
+
 class SA(nn.Module):
     def __init__(self, inchannels, outchannels):
         super(SA).__init__()
@@ -97,14 +98,19 @@ class PCTEncoder(nn.Module):
         self.oa2 = OA(2*dim_embed, dim_embed//4)
         self.oa3 = OA(2*dim_embed, dim_embed//4)
         self.oa4 = OA(2*dim_embed, dim_embed//4)
+        self.edgeconv1 = EdgeConv(2*dim_embed, [4*dim_embed, 2*dim_embed])
+        self.edgeconv2 = EdgeConv(2*dim_embed, [4*dim_embed, 2*dim_embed])
+        self.edgeconv3 = EdgeConv(2*dim_embed, [4*dim_embed, 2*dim_embed])
+
         self.lbr1 = LBRD(dim_embed*8, globalFeatures)
 
     def forward(self, x):
         x = self.embedding(x)
-        oa1 = self.oa1(x)
-        oa2 = self.oa2(oa1)
-        oa3 = self.oa3(oa2)
+        oa1 = self.edgeconv1(self.oa1(x))
+        oa2 = self.edgeconv2(self.oa2(oa1))
+        oa3 = self.edgeconv3(self.oa3(oa2))
         oa4 = self.oa4(oa3)
+
         x = torch.concat([oa1, oa2, oa3, oa4], dim = 2)
         x = self.lbr1(x.unsqueeze(2)).squeeze(2)                                   # Point Features
 
