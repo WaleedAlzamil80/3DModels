@@ -43,48 +43,35 @@ class NeighborEmbedding(nn.Module):
 
         return x
 
- 
-class SA(nn.Module):
-    def __init__(self, inchannels, outchannels):
-        super(SA).__init__()
-        self.k_conv = nn.Conv1d(inchannels, outchannels, 1, bias = False)
-        self.q_conv = nn.Conv1d(inchannels, outchannels, 1, bias = False)
-        self.v_conv = nn.Conv1d(inchannels, inchannels, 1, bias = False)
-        self.project = LBRD(inchannels, inchannels)
-        self.softmax = nn.Softmax(dim = -1)
-
-    def forward(self, x):                                         # B, N, C
-
-        q = self.q_conv(x.permute(0, 2, 1)).permute(0, 2, 1)      # B, N, D
-        k = self.k_conv(x.permute(0, 2, 1))                       # B, D, N
-        v = self.v_conv(x.permute(0, 2, 1)).permute(0, 2, 1)      # B, N, C
-        energy = torch.bmm(q, k)                                  # B, N, N
-        attention = self.softmax(energy / torch.sqrt(q.shape[2]))
-        x_w = torch.bmm(attention, v)                             # (B, N, N) @ (B, N, C) -> (B, N, C)
-        x_w = self.project(x_w)
-
-        return x_w + x
-
 
 class OA(nn.Module):
-    def __init__(self, inchannels, outchannels):
+    def __init__(self, inchannels, outchannels, offset = True):
         super(OA, self).__init__()
+        self.offset = offset
         self.k_conv = nn.Conv1d(inchannels, outchannels, 1, bias = False)
         self.q_conv = nn.Conv1d(inchannels, outchannels, 1, bias = False)
         self.v_conv = nn.Conv1d(inchannels, inchannels, 1, bias = False)
         self.project = LBRD(inchannels, inchannels)
-
-        self.softmax = nn.Softmax(dim = 1)
+        if self.offset:
+            self.softmax = nn.Softmax(dim = 1)
+        else:
+            self.softmax = nn.Softmax(dim = -1)
 
     def forward(self, x):                                         # B, N, C
         q = self.q_conv(x.permute(0, 2, 1)).permute(0, 2, 1)      # B, N, D
         k = self.k_conv(x.permute(0, 2, 1))                       # B, D, N
         v = self.v_conv(x.permute(0, 2, 1)).permute(0, 2, 1)      # B, N, C
         energy = torch.bmm(q, k)                                  # B, N, N
-        attention = self.softmax(energy)
-        attention = attention / (1e-9 + attention.sum(dim=-1, keepdims=True))
-        x_r = torch.bmm(attention, v)                             # (B, N, N) @ (B, N, C) -> (B, N, C)
-        x_r = self.project((x - x_r).unsqueeze(2)).squeeze(2)
+
+        if self.offset:
+            attention = self.softmax(energy)
+            attention = attention / (1e-9 + attention.sum(dim=-1, keepdims=True))
+            x_r = torch.bmm(attention, v)                             # (B, N, N) @ (B, N, C) -> (B, N, C)
+            x_r = self.project((x - x_r).unsqueeze(2)).squeeze(2)
+        else:
+            attention = self.softmax(energy / torch.sqrt(q.shape[2]))
+            x_w = torch.bmm(attention, v)                             # (B, N, N) @ (B, N, C) -> (B, N, C)
+            x_w = self.project(x_w)
 
         return x_r + x
 

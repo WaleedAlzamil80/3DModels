@@ -1,36 +1,6 @@
 from scipy.spatial import cKDTree
 import torch
 
-def neigh(x, args):
-
-    if len(x.shape) == 2:
-        x = x.unsqueeze(0)
-
-    k = args.knn
-    batch_size, num_points, num_features = x.shape
-
-    # Compute pairwise distances
-    dist = torch.cdist(x, x, p=2)
-    # dist = pairwise_dist_blockwise(x)
-
-    # Mask the diagonal to avoid including the point itself as a neighbor
-    dist.masked_fill_(torch.eye(num_points, device=x.device).bool().unsqueeze(0), float('inf'))  # Set self-distances to infinity
-    # for i in range(batch_size):
-    #     dist[i].fill_diagonal_(float('inf'))
-
-    # Get the indices of the k-nearest neighbors
-    _, idx = dist.topk(k, dim=-1, largest=False)
-
-    # Efficient neighbor gathering using advanced indexing (avoids expansion)
-    neighbors = x[torch.arange(batch_size).unsqueeze(1).unsqueeze(2), idx]
-
-    # neighbors = torch.gather(x.unsqueeze(1).expand(-1, num_points, -1, -1), 2, idx.unsqueeze(3).expand(-1, -1, -1, num_features))
-
-    # Compute edge features
-    edge_features = torch.cat([x.unsqueeze(2).expand(-1, -1, k, -1), neighbors - x.unsqueeze(2)], dim=-1)
-
-    return edge_features
-
 
 def kdneigh(x, args):
 
@@ -116,19 +86,19 @@ def compute_local_covariance(points):
     """
     # Calculate mean across neighbors (dim=-2)
     means = points.mean(dim=-2, keepdim=True)  # Shape: [batch_size, num_points, 1, 3]
-    
+
     # Subtract mean from neighbors
     centered_points = points - means  # Shape: [batch_size, num_points, k_nearest, 3]
-    
+
     # Compute outer product of centered points (batched matrix multiplication)
     # Reshape centered points for bmm
     centered_points_flat = centered_points.view(-1, points.size(-2), points.size(-1))  # Shape: [B*num_points, k_nearest, 3]
     cov_matrices = torch.bmm(centered_points_flat.transpose(1, 2), centered_points_flat)  # Shape: [B*num_points, 3, 3]
-    
+
     # Normalize by the number of neighbors (k_nearest)
     cov_matrices /= points.size(-2)  # Normalize by K
-    
+
     # Reshape back to batch structure and flatten the 3x3 matrix
     cov_matrices = cov_matrices.view(points.size(0), points.size(1), 9)  # Shape: [batch_size, num_points, 9]
-    
+
     return cov_matrices

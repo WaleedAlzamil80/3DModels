@@ -15,3 +15,7 @@ def fpsample_fps(points, num_centroids=2048, k=32):
     kdline_fps_samples_idx = fpsample.bucket_fps_kdline_sampling(points, num_centroids, h=9)
     centroids = points[kdline_fps_samples_idx]
     return k_nearest_neighbors_optimized(points, centroids, k)
+ 
+def fps(points, num_centroids=2048):
+    kdline_fps_samples_idx = fpsample.bucket_fps_kdline_sampling(points, num_centroids, h=9)
+    return points[kdline_fps_samples_idx], kdline_fps_samples_idx
