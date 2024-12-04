@@ -13,6 +13,7 @@ The primary focus is currently on **segmentation**, implementing 3D models tailo
 ## Directory Structure  
 
 - **`main.py`**: The main script to train or test models.  
+- **`infer_segmentation.py`**: The main script to infere a trained model on a file.  
 - **`requirements.txt`**: Lists all Python dependencies.  
 - **`Dataset/`**: Code and utilities for loading and preprocessing datasets.  
 - **`models/`**: Contains model architectures for segmentation and future generation tasks.  
@@ -62,13 +63,78 @@ pip install torch torchvision numpy scikit-learn trimesh
 
 ### Training
 
-To train the PointNet model on a dataset, use the `train.py` script:
+To train a model on your dataset, use the `main.py` script with the following command:
 
 ```bash
-python train.py --dataset /path/to/dataset --epochs 50 --batch_size 32
+python3 main.py \
+    --path "/path_to_dataset_folder" \
+    --test_ids "/home/waleed/Documents/3DLearning/3DModels/test_final_data.txt" \
+    --n_centroids 1024 \
+    --knn 16 \
+    --clean \
+    --nsamples 1 \
+    --batch_size 2 \
+    --num_workers 4 \
+    --sampling "fpsample" \
+    --p 1 \
+    --num_epochs 5 \
+    --model "PCT" \
+    --loss "crossentropy" \
+    --rigid_augmentation_train \
+    --rotat 1
 ```
 
-You can customize the training configuration by modifying the arguments like dataset path, number of epochs, and batch size.
+### Explanation of Key Arguments:
+- `--path`: Path to the dataset directory.
+- `--test_ids`: File containing test dataset IDs.
+- `--n_centroids`: Number of centroids for sampling.
+- `--nsamples`: Number of nearest neighbors or sample points.
+- `--knn`: Number of nearest neighbors for dynamic graph construction.
+- `--clean`: Flag to clean the dataset by removing unnecessary points.
+- `--sampling`: Sampling technique (e.g., `fps`, `voxilization`).
+- `--batch_size`: Number of samples per batch during training.
+- `--num_epochs`: Number of epochs for training.
+- `--model`: The model architecture to use (e.g., `DynamicGraphCNN`, `PCT`).
+- `--loss`: Loss function to optimize (e.g., `crossentropy`, `focal`,  `dice`).
+
+You can customize these arguments to suit your training configuration.
+
+---
+
+### Inference
+
+To perform inference using a trained model, run the `infer_segmentation.py` script:
+
+```bash
+python3 infer_segmentation.py \
+    --model "PCT" \
+    --pretrained "/path_to_checkpoint/model_checkpoint.pth" \
+    --path "/path_to_input_file.bmesh" \
+    --clean \
+    --p 0 \
+    --sample \
+    --sampling "fpsample" \
+    --n_centroids 1024 \
+    --nsamples 16 \
+    --visualize \
+    --test \
+    --test_ids "/path_to_test_file.json"
+```
+
+### Explanation of Key Arguments:
+- `--model`: Model architecture used for inference.
+- `--pretrained`: Path to the pretrained model checkpoint.
+- `--path`: Path to the input file (e.g., `.bmesh` format).
+- `--clean`: Flag to clean data points during preprocessing.
+- `--p`: Indicate if the file is lower jaw `0` or upper jaw `1`.
+- `--sample`: Flag to enable sampling from the entire input file.
+- `--sampling`: Sampling technique used (e.g., `fpsample`).
+- `--n_centroids`: Number of centroids used for sampling.
+- `--nsamples`: Number of nearest neighbors or sample points.
+- `--knn`: Number of nearest neighbors for dynamic graph construction.
+- `--visualize`: Flag to visualize the segmentation results.
+- `--test`: Flag to compare results against ground truth.
+- `--test_ids`: Path to the test dataset IDs file (e.g., `.json` format).
 
 ## Contributing
 
@@ -81,7 +147,7 @@ Contributions are welcome! Feel free to open issues or submit pull requests if y
 
 Feel free to adjust this template to match the exact specifics of your project!
 
-## Future Work  
+## Future Work
 - Crown generation models and tools.  
 - Enhanced visualization and post-processing methods.  
 - Integration with other dental datasets for generalizability.  

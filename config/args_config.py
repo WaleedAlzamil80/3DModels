@@ -34,7 +34,8 @@ def parse_args():
     parser.add_argument('--Dataset', type=str, default="OSF", help="Which Dataset?")
     parser.add_argument('--output', type=str, default="output", help="Output path")
     parser.add_argument('--test_ids', type=str, default="private-testing-set.txt", help="Path of the ids dataset for testing")
-    parser.add_argument('--test', action='store_true', help="see the ground truth")
+    parser.add_argument('--visualize', action='store_true', help="see the ground truth")
+    parser.add_argument('--test', action='store_true', help="compare with ground truth")
     parser.add_argument('--p', type=int, default=6, help="data parts")
 
     ## DataLoader    
@@ -42,6 +43,7 @@ def parse_args():
 
     ## Processing on the data
     parser.add_argument('--clean', action='store_true', help="Clean some of the gingave points")
+    parser.add_argument('--sample', action='store_true', help="Sample from the entire file")
     parser.add_argument('--rigid_augmentation_train', action='store_true', help="More Transformations")
     parser.add_argument('--rigid_augmentation_test', action='store_true', help="More Transformations")
 
