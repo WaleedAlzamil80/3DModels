@@ -81,18 +81,21 @@ python3 main.py \
     --model "PCT" \
     --loss "crossentropy" \
     --rigid_augmentation_train \
-    --rotat 1
+    --rotat 1 \
+    --k 33
 ```
 
 ### Explanation of Key Arguments:
 - `--path`: Path to the dataset directory.
 - `--test_ids`: File containing test dataset IDs.
+- `--k`: Number of classes for segmentation or classification.
 - `--n_centroids`: Number of centroids for sampling.
 - `--nsamples`: Number of nearest neighbors or sample points.
 - `--knn`: Number of nearest neighbors for dynamic graph construction.
 - `--clean`: Flag to clean the dataset by removing unnecessary points.
 - `--sampling`: Sampling technique (e.g., `fps`, `voxilization`).
 - `--batch_size`: Number of samples per batch during training.
+- `--rotat`: Degree of rotation (rotated randomlly before feeding to the model withen range `[-rotat*pi, rotat*pi]`).
 - `--num_epochs`: Number of epochs for training.
 - `--model`: The model architecture to use (e.g., `DynamicGraphCNN`, `PCT`).
 - `--loss`: Loss function to optimize (e.g., `crossentropy`, `focal`,  `dice`).
@@ -118,13 +121,16 @@ python3 infer_segmentation.py \
     --nsamples 16 \
     --visualize \
     --test \
-    --test_ids "/path_to_test_file.json"
+    --test_ids "/path_to_test_file.json" \
+    --k 33
+
 ```
 
 ### Explanation of Key Arguments:
 - `--model`: Model architecture used for inference.
 - `--pretrained`: Path to the pretrained model checkpoint.
 - `--path`: Path to the input file (e.g., `.bmesh` format).
+- `--k`: Number of classes for segmentation or classification.
 - `--clean`: Flag to clean data points during preprocessing.
 - `--p`: Indicate if the file is lower jaw `0` or upper jaw `1`.
 - `--sample`: Flag to enable sampling from the entire input file.
@@ -134,7 +140,7 @@ python3 infer_segmentation.py \
 - `--knn`: Number of nearest neighbors for dynamic graph construction.
 - `--visualize`: Flag to visualize the segmentation results.
 - `--test`: Flag to compare results against ground truth.
-- `--test_ids`: Path to the test dataset IDs file (e.g., `.json` format).
+- `--test_ids`: Path to the ground truth of the file (e.g., `.json` format).
 
 ## Contributing
 

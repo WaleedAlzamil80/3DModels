@@ -24,9 +24,7 @@ def parse_args():
     ## Training hyperparameters
     parser.add_argument('--lr', type=float, default=0.001, help="Learning Rate")
     parser.add_argument('--gamma', type=float, default=0.5, help="Learning rate decay")
-    
     parser.add_argument('--rotat', type=float, default=0.25, help="rotation invariates")
-    parser.add_argument('--trans', type=float, default=0.5, help="translation invariantes")
 
     # Datasets args
     ## Pathes

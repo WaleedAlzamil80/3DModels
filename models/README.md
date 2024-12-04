@@ -59,18 +59,6 @@ This model explores techniques for data mining and feature extraction in point c
 
 ---
 
-### 6. FoldingNet
-FoldingNet is an autoencoder designed for unsupervised feature learning on 3D point clouds. It reconstructs the input point cloud by "folding" a 2D grid onto a 3D surface.
-
-- **Paper**: [FoldingNet: Point Cloud Auto-encoder via Deep Grid Deformation](https://arxiv.org/abs/1712.07262)
-- **Current Implementation**: FoldingNet is implemented as a standalone Point Cloud Generator.
-- **Future Enhancements**:
-  - Integration with other attention mechanisms and DGCNN for crown generation
-
-![FoldingNet](/images/Graphs/FoldingNet.png)
-
----
-
 ## Usage  
 This repository provides a unified interface for all implemented models. You can easily switch between models and tasks using the factory pattern.
 
