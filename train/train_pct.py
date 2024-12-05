@@ -89,7 +89,7 @@ def train(model, train_loader, test_loader, args):
                 vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 
                 if args.rigid_augmentation_test:
-                    vertices = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
+                    vertices = apply_random_transformation(vertices, rotat=args.rotat)
 
                 # Forward pass
                 outputs = model(vertices, jaw)
