@@ -27,7 +27,7 @@ def train(model, train_loader, test_loader, args):
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
             vertices = vertices.to(device)
-            verticesTransformed = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
+            verticesTransformed = apply_random_transformation(vertices, rotat=args.rotat)
 
             # Forward pass
             tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))

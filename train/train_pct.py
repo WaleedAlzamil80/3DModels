@@ -41,7 +41,7 @@ def train(model, train_loader, test_loader, args):
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
 
             if args.rigid_augmentation_train:
-                vertices = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
+                vertices = apply_random_transformation(vertices, rotat=args.rotat)
 
             vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 

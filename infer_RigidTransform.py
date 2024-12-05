@@ -1,12 +1,9 @@
 import os
-from itertools import combinations
 
 import torch
-from torch import nn
 import numpy as np
 import fastmesh as fm
 import trimesh
-import json
 
 from factories.model_factory import get_model
 from factories.sampling_factory import get_sampling_technique
@@ -59,7 +56,7 @@ if args.clean:
 
     vertices_np = vertices_np[valid_mask]
  
-# vertices_np = vertices_np - np.mean(vertices_np, axis=0)
+vertices_np = vertices_np - np.mean(vertices_np, axis=0)
 
 sampling = get_sampling_technique(args.sampling)
 vertices_np, idx = sampling(vertices_np, args.n_centroids, args.nsamples)
@@ -69,7 +66,7 @@ cloud.show()
 vertices_ori = torch.tensor(vertices_np, dtype=torch.float32, device=device).view(-1, 3).unsqueeze(0)
 vertices = torch.tensor(vertices_np, dtype=torch.float32, device=device).view(-1, 3).unsqueeze(0)
 
-vertices = apply_random_transformation(vertices, rotat=args.rotat, trans=args.trans)
+vertices = apply_random_transformation(vertices, rotat=args.rotat)
 cloud = trimesh.points.PointCloud(vertices[0].cpu().detach())
 cloud.show()
 
@@ -101,15 +98,15 @@ distances_vertices = torch.cdist(vertices, vertices) #  pairwise_distances(verti
 distances_output = torch.cdist(output, output) #  pairwise_distances(output) 
 
 # MY newwwww Loss Function
-print((torch.mean(torch.abs(distances_vertices_ori-distances_output), dim=(1,2))))
-print((torch.mean(torch.abs(distances_vertices-distances_output), dim=(1,2))))
-print((torch.mean(torch.abs(distances_vertices-distances_vertices_ori), dim=(1,2))))
+print((torch.mean(torch.abs(distances_vertices_ori-distances_output), dim=(1,2))).item())
+print((torch.mean(torch.abs(distances_vertices-distances_output), dim=(1,2))).item())
+print((torch.mean(torch.abs(distances_vertices-distances_vertices_ori), dim=(1,2))).item())
 
-print("vertices_ori vs vertices:", torch.allclose(distances_vertices_ori, distances_vertices, atol=tol))
-print("vertices_ori vs output:", torch.allclose(distances_vertices_ori, distances_output, atol=tol))
+# print("vertices_ori vs vertices:", torch.allclose(distances_vertices_ori, distances_vertices, atol=tol))
+# print("vertices_ori vs output:", torch.allclose(distances_vertices_ori, distances_output, atol=tol))
 
-print("vertices vs vertices_ori:", torch.allclose(distances_vertices, distances_vertices_ori, atol=tol))
-print("vertices vs output:", torch.allclose(distances_vertices, distances_output, atol=tol))
+# print("vertices vs vertices_ori:", torch.allclose(distances_vertices, distances_vertices_ori, atol=tol))
+# print("vertices vs output:", torch.allclose(distances_vertices, distances_output, atol=tol))
 
-print("output vs vertices_ori:", torch.allclose(distances_output, distances_vertices_ori, atol=tol))
-print("output vs vertices:", torch.allclose(distances_output, distances_vertices, atol=tol))
+# print("output vs vertices_ori:", torch.allclose(distances_output, distances_vertices_ori, atol=tol))
+# print("output vs vertices:", torch.allclose(distances_output, distances_vertices, atol=tol))

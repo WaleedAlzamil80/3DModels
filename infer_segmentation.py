@@ -7,7 +7,6 @@ import trimesh
 import json
 
 from factories.model_factory import get_model
-from factories.sampling_factory import get_sampling_technique
 from vis.visulizeGrouped import visualize_with_trimesh
 from config.args_config import parse_args
 from sklearn.metrics import accuracy_score

@@ -20,7 +20,7 @@ def random_rotation_matrix(batch_size, rotat=0.25, device='cpu'):
     return R
 
 # Function to apply random rigid transformation
-def apply_random_transformation(points, rotat = 0.25, trans = 0.5):
+def apply_random_transformation(points, rotat = 0.25):
     batch_size, num_points, _ = points.shape
     device = points.device
 
