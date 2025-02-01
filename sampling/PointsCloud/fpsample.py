@@ -9,7 +9,7 @@ def k_nearest_neighbors_optimized(points, centroids, k):
     _, knn_indices = kdtree.query(centroids, k=k)
  
     return points[knn_indices], knn_indices
-
+ 
 # fpsample (from PyPI) 
 def fpsample_fps(points, num_centroids=2048, k=32):
     kdline_fps_samples_idx = fpsample.bucket_fps_kdline_sampling(points, num_centroids, h=9)

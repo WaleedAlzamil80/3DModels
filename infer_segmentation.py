@@ -14,10 +14,11 @@ from metrics.meanAccClass import compute_mean_per_class_accuracy
 from metrics.mIOU import compute_mIoU
 from segment import segment
 from prepare_vertices import preprocess
+from rigidTransformations import apply_random_transformation
 
 args = parse_args()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+print(args.path)
 vertices = fm.load(args.path)[0]
 if args.test:
     with open(args.test_ids, 'r') as f: 
@@ -26,6 +27,8 @@ if args.test:
 else:
      labels=None
 vertices, labels = preprocess(vertices_np=vertices, cetroids=args.n_centroids, knn=args.nsamples,clean=args.clean, sample=args.sample, labels=labels)
+
+vertices = apply_random_transformation(vertices, rotat=args.rotat)
 
 model = get_model(args.model, mode="segmentation", k=33).to(device)
 # Load pretrained weights if provided
@@ -52,7 +55,7 @@ if args.test:
     acc = accuracy_score(labels.view(-1).cpu().numpy(), output.view(-1).cpu().numpy())
 
     print(f"Accuracy : {acc:.4f}")
-    print(f"AccPerCl : {accPC:.4f}")
+    print(f"AccPerCl : {accPC:.4f}") 
     print(f"mIOU : {mIOU:.4f}")
 
 # Visulize the performance

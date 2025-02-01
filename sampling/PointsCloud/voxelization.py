@@ -8,7 +8,7 @@ def voxel_grid_downsampling(point_cloud, voxel_size):
     pcd.points = o3d.utility.Vector3dVector(point_cloud)
     downsampled_pcd = pcd.voxel_down_sample(voxel_size)
     return np.asarray(downsampled_pcd.points)
-
+ 
 def downsample_to_fixed_vertices(vertices, num_target_points, k, voxel_size=0.5):
     """
     Downsample point cloud to a fixed number of vertices.
@@ -27,8 +27,8 @@ def downsample_to_fixed_vertices(vertices, num_target_points, k, voxel_size=0.5)
 
     # If the downsampled points are greater than the target, apply FPS to reduce
     if downsampled_vertices.shape[0] > num_target_points:
-        downsampled_vertices, centroids_idx = FPS(downsampled_vertices, num_target_points*k)
-        # downsampled_vertices, centroids_idx = FPSample(downsampled_vertices, num_target_points, k)
+        # downsampled_vertices, centroids_idx = FPS(downsampled_vertices, num_target_points*k)
+        downsampled_vertices, centroids_idx = FPSample(downsampled_vertices, num_target_points, k)
 
     # If the downsampled points are fewer than the target, do random sampling
     elif downsampled_vertices.shape[0] < num_target_points:
