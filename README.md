@@ -142,6 +142,23 @@ python3 infer_segmentation.py \
 - `--test`: Flag to compare results against ground truth.
 - `--test_ids`: Path to the ground truth of the file (e.g., `.json` format).
 
+### 🐳 Using the Docker Image  
+
+You can pull and run the trained model directly from **Docker Hub**:  
+
+```bash
+docker pull waleedalzamil80/teeth_segmentation_last_pct_model:latest
+```
+
+To run the model:  
+
+```bash
+docker run -p 8000:8000 waleedalzamil80/teeth_segmentation_last_pct_model:latest
+```
+
+This will launch the model as a service, allowing you to send images for segmentation. Check the documentation for API details.
+In future I will deploy it on AWS or Azure, wait for it ;)
+
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests if you want to improve the repository or add new features/models.

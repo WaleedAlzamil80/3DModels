@@ -29,7 +29,13 @@ else:
 vertices, labels = preprocess(vertices_np=vertices, cetroids=args.n_centroids, knn=args.nsamples,clean=args.clean, sample=args.sample, labels=labels)
 
 vertices = apply_random_transformation(vertices, rotat=args.rotat)
-
+print(labels!=17)
+print(labels)
+me = vertices[labels!=17] 
+# Create a trimesh object for the point cloud
+cloud = trimesh.points.PointCloud(me)
+# Show the point cloud
+cloud.show()
 model = get_model(args.model, mode="segmentation", k=33).to(device)
 # Load pretrained weights if provided
 if args.pretrained and os.path.exists(args.pretrained):

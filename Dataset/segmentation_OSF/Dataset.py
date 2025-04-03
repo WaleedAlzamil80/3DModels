@@ -79,7 +79,7 @@ class TeethSegmentationDataset(Dataset):
             vertices_np_cleaned = vertices_np
             valid_mask = 0
         
-        vertices_np = vertices_np - np.mean(vertices_np, axis=0)
+        vertices_np_cleaned = vertices_np_cleaned - np.mean(vertices_np_cleaned, axis=0)
         points, idx = self.sampling_fn(vertices_np_cleaned, self.args.n_centroids, self.args.nsamples)
 
         return points, idx, valid_mask

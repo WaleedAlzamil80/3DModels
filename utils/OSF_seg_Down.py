@@ -6,7 +6,7 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Model training parameters")
-    parser.add_argument('--n', type=int, default=4, help="Number of Parts to Download")
+    parser.add_argument('--n', type=int, default=1, help="Number of Parts to Download")
     parser.add_argument('--path', type=str, default="dataset", help="Extract to")
 
     return parser.parse_args()
