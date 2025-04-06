@@ -46,6 +46,7 @@ def train(model, train_loader, test_loader, args):
 
             if args.rigid_augmentation_train:
                 vertices = apply_random_transformation(vertices, rotat=args.rotat)
+            vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
             # Forward pass
             outputs, tin = model(vertices, jaw)
@@ -93,6 +94,7 @@ def train(model, train_loader, test_loader, args):
     
                 if args.rigid_augmentation_test:
                     vertices = apply_random_transformation(vertices, rotat=args.rotat)
+                vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
                 # Forward pass
                 outputs, tin = model(vertices, jaw)

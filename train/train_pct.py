@@ -1,3 +1,4 @@
+import trimesh
 import os
 import numpy as np
 import torch
@@ -39,11 +40,11 @@ def train(model, train_loader, test_loader, args):
         test_acc_e = []
 
         for vertices, labels, jaw in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.num_epochs}'):
+            vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 
             if args.rigid_augmentation_train:
                 vertices = apply_random_transformation(vertices, rotat=args.rotat)
-
-            vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
+            vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
             # Forward pass
             outputs = model(vertices, jaw)
@@ -90,6 +91,7 @@ def train(model, train_loader, test_loader, args):
 
                 if args.rigid_augmentation_test:
                     vertices = apply_random_transformation(vertices, rotat=args.rotat)
+                vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
                 # Forward pass
                 outputs = model(vertices, jaw)
