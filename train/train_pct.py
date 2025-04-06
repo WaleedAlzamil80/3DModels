@@ -1,5 +1,3 @@
-import trimesh
-
 import os
 import numpy as np
 import torch
@@ -44,8 +42,6 @@ def train(model, train_loader, test_loader, args):
 
             if args.rigid_augmentation_train:
                 vertices = apply_random_transformation(vertices, rotat=args.rotat)
-            cloud = trimesh.points.PointCloud(vertices[0])
-            cloud.show()
 
             vertices, labels, jaw = vertices.to(device), labels.to(device), jaw.to(device)
 
