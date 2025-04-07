@@ -36,11 +36,6 @@ def preprocess(vertices_np, cetroids=4096, knn= 32, alpha = 2.0, delta = 5, samp
         )
         vertices_np = vertices_np[valid_mask]
 
-    # # Create a trimesh object for the point cloud
-    # cloud = trimesh.points.PointCloud(vertices_np)
-    # # Show the point cloud
-    # cloud.show()
-
     # Downsample the vertices if sampling is enabled
     if sample:
         sampling = get_sampling_technique("fpsample")
@@ -55,10 +50,5 @@ def preprocess(vertices_np, cetroids=4096, knn= 32, alpha = 2.0, delta = 5, samp
         labels = torch.tensor(np.array(labels, dtype=np.int64)[valid_mask], dtype=torch.long).view(1, -1)
     elif labels is not None:
         labels = torch.tensor(np.array(labels, dtype=np.int64), dtype=torch.long).view(1, -1)
-
-    # Create a trimesh object for the point cloud
-    cloud = trimesh.points.PointCloud(vertices_np)
-    # Show the point cloud
-    cloud.show()
 
     return torch.tensor(vertices_np, dtype=torch.float32).view(1, -1, 3), labels

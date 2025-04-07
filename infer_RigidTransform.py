@@ -1,5 +1,4 @@
 import os
-
 import torch
 import numpy as np
 import fastmesh as fm
@@ -93,20 +92,11 @@ cloud.show()
 
 # Pairwise comparisons for all combinations of tensors
 tol = 1e-3
-distances_vertices_ori = torch.cdist(vertices_ori, vertices_ori) #  pairwise_distances(vertices_ori)
-distances_vertices = torch.cdist(vertices, vertices) #  pairwise_distances(vertices)
-distances_output = torch.cdist(output, output) #  pairwise_distances(output) 
+distances_vertices_ori = torch.cdist(vertices_ori, vertices_ori)
+distances_vertices = torch.cdist(vertices, vertices)
+distances_output = torch.cdist(output, output)
 
 # MY newwwww Loss Function
 print((torch.mean(torch.abs(distances_vertices_ori-distances_output), dim=(1,2))).item())
 print((torch.mean(torch.abs(distances_vertices-distances_output), dim=(1,2))).item())
 print((torch.mean(torch.abs(distances_vertices-distances_vertices_ori), dim=(1,2))).item())
-
-# print("vertices_ori vs vertices:", torch.allclose(distances_vertices_ori, distances_vertices, atol=tol))
-# print("vertices_ori vs output:", torch.allclose(distances_vertices_ori, distances_output, atol=tol))
-
-# print("vertices vs vertices_ori:", torch.allclose(distances_vertices, distances_vertices_ori, atol=tol))
-# print("vertices vs output:", torch.allclose(distances_vertices, distances_output, atol=tol))
-
-# print("output vs vertices_ori:", torch.allclose(distances_output, distances_vertices_ori, atol=tol))
-# print("output vs vertices:", torch.allclose(distances_output, distances_vertices, atol=tol))

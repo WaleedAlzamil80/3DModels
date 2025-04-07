@@ -31,9 +31,20 @@ class DiceLoss(nn.Module):
         self.smooth = smooth
 
     def forward(self, preds, labels):
+        # preds: [B, N, C], labels: [B, N]
+        num_classes = preds.size(2)
+
+        # Apply softmax if preds are logits
+        preds = F.softmax(preds, dim=2)
+
+
+        # One-hot encode labels: [B, N] → [B, N, C]
+        labels_one_hot = F.one_hot(labels, num_classes=num_classes).float()
+
+
         # Flatten predictions and labels
         preds = preds.contiguous().view(-1)
-        labels = labels.contiguous().view(-1)
+        labels = labels_one_hot.contiguous().view(-1)
 
         # Calculate intersection and union
         intersection = (preds * labels).sum()
@@ -41,6 +52,7 @@ class DiceLoss(nn.Module):
 
         # Dice Loss
         dice = (2. * intersection + self.smooth) / (union + self.smooth)
+        print(f"Dice Loss: {dice.item()}")
         return 1 - dice
 
 
