@@ -1,7 +1,7 @@
-import trimesh
 import os
 import numpy as np
 import torch
+from torch.amp import autocast
 from factories.losses_factory import get_loss
 from rigidTransformations import apply_random_transformation
 from tqdm import tqdm
@@ -47,7 +47,8 @@ def train(model, train_loader, test_loader, args):
             vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
             # Forward pass
-            outputs = model(vertices, jaw)
+            with autocast(device_type='cuda'):
+                outputs = model(vertices, jaw)
 
             loss = criterion(outputs, labels)
             cum_loss += loss.item()
@@ -94,7 +95,8 @@ def train(model, train_loader, test_loader, args):
                 vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
                 # Forward pass
-                outputs = model(vertices, jaw)
+                with autocast(device_type='cuda'):
+                    outputs = model(vertices, jaw)
 
                 t_loss += criterion(outputs, labels).item()
 
