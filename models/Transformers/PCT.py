@@ -120,13 +120,13 @@ class PCTclassification(nn.Module):
 
 
 class PCTsegmentation(nn.Module):
-    def __init__(self, dim_in=3, dim_embed=128, k=33, globalFeatures=1024):
+    def __init__(self, dim_in=3, dim_embed=256, k=33, globalFeatures=2048, dim_cat = 128):
         super(PCTsegmentation, self).__init__()
         self.encoder = PCTEncoder(dim_in, dim_embed, globalFeatures)
-        self.embedding = nn.Embedding(2, 64)
-        self.embed_conv = nn.Conv1d(64, 64, 1)
+        self.embedding = nn.Embedding(2, dim_cat)
+        self.embed_conv = nn.Conv1d(dim_cat, dim_cat, 1)
 
-        self.lbrd1 = LBRD(globalFeatures*3 + 64, dim_embed*2, 0.5)
+        self.lbrd1 = LBRD(globalFeatures*3 + dim_cat, dim_embed*2, 0.5)
         self.lbrd2 = LBRD(dim_embed*2, dim_embed*2)
         self.linear = nn.Conv2d(dim_embed*2, k, 1)
 
