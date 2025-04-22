@@ -31,7 +31,7 @@ def train(model, train_loader, test_loader, args):
             vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
             # Forward pass
-            tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
+            tin = model(verticesTransformed)
             verticesTransformed = torch.bmm(verticesTransformed, tin)
             # disvt = torch.cdist(verticesTransformed, verticesTransformed)
             # disv = torch.cdist(vertices, vertices)
@@ -64,7 +64,7 @@ def train(model, train_loader, test_loader, args):
                 vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
                 # Forward pass
-                tin = model(verticesTransformed.transpose(1, 2).unsqueeze(3))
+                tin = model(verticesTransformed)
                 verticesTransformed = torch.bmm(verticesTransformed, tin)
 
                 # disvt = torch.cdist(verticesTransformed, verticesTransformed)

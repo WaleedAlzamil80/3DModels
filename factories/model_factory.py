@@ -4,6 +4,7 @@ from models.PointNetpp.SPwGKL import TNetkd as TNmod
 from models.GraphCNN.DGCNN import DGCNN
 from models.FoldingNet.Mining import GaussianKernelConv
 from models.Transformers.PCT import PCTransformer
+from models.PointNetpp.customSP import attentionTNET
 
 # Dictionary that maps model names to model classes
 MODEL_FACTORY = {
@@ -13,6 +14,7 @@ MODEL_FACTORY = {
     "DynamicGraphCNN": DGCNN,
     "SpatialTransformer": TNetkd,
     "SpatialTransformer_v2": TNmod,
+    "SpatialTransformer_v3": attentionTNET,
     "PCT": PCTransformer,
 }
 

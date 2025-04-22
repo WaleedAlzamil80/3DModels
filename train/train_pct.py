@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 from torch.amp import autocast
+from pca import batched_pca
 from factories.losses_factory import get_loss
 from rigidTransformations import apply_random_transformation
 from tqdm import tqdm
@@ -44,7 +45,7 @@ def train(model, train_loader, test_loader, args):
 
             if args.rigid_augmentation_train:
                 vertices = apply_random_transformation(vertices, rotat=args.rotat)
-            vertices = vertices - vertices.mean(dim=1, keepdim=True)
+            vertices, eigen_vectors, eigen_values = batched_pca(vertices, 3)
 
             # Forward pass
             with autocast(device_type='cuda'):
@@ -92,7 +93,7 @@ def train(model, train_loader, test_loader, args):
 
                 if args.rigid_augmentation_test:
                     vertices = apply_random_transformation(vertices, rotat=args.rotat)
-                vertices = vertices - vertices.mean(dim=1, keepdim=True)
+                vertices, eigen_vectors, eigen_values = batched_pca(vertices, 3)
 
                 # Forward pass
                 with autocast(device_type='cuda'):
