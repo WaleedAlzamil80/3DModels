@@ -120,7 +120,7 @@ class PCTclassification(nn.Module):
 
 
 class PCTsegmentation(nn.Module):
-    def __init__(self, dim_in=3, dim_embed=256, k=33, globalFeatures=2048, dim_cat = 128):
+    def __init__(self, dim_in=3, dim_embed=128, k=33, globalFeatures=1024, dim_cat = 64):
         super(PCTsegmentation, self).__init__()
         self.encoder = PCTEncoder(dim_in, dim_embed, globalFeatures)
         self.embedding = nn.Embedding(2, dim_cat)

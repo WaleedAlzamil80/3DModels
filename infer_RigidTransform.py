@@ -8,7 +8,7 @@ from factories.model_factory import get_model
 from factories.sampling_factory import get_sampling_technique
 from rigidTransformations import apply_random_transformation
 from config.args_config import parse_args
-from losses.RegularizarionPointNet import tnet_regularization
+from losses.RegularizarionPointNet import tnet_regularization, project_to_so3
 from factories.losses_factory import get_loss
 args = parse_args()
 
@@ -69,11 +69,15 @@ vertices = apply_random_transformation(vertices, rotat=args.rotat)
 cloud = trimesh.points.PointCloud(vertices[0].cpu().detach())
 cloud.show()
 
-inT = model(vertices.transpose(1, 2).unsqueeze(2))
-output = torch.matmul(vertices.squeeze(0), inT.squeeze(0)).unsqueeze(0)
+inT = model(vertices) # .transpose(1, 2).unsqueeze(2)
+R_projected = project_to_so3(inT.squeeze(0)).unsqueeze(0)
+print(inT.shape)
+print(R_projected.shape, vertices.shape)
+output = torch.matmul(vertices.squeeze(0), R_projected[0]).unsqueeze(0)
+output2 = torch.matmul(vertices.squeeze(0), inT.squeeze(0)).unsqueeze(0)
 
 # How far the matrix from identity
-R = inT
+R = R_projected # inT
 det_R = torch.det(R[0])
 is_orthogonal = torch.allclose(R[0] @ R[0].T, torch.eye(3).to(device), atol=1e-5)
 
@@ -89,6 +93,13 @@ print(f"Determinant: {det_R}, Is Orthogonal: {is_orthogonal}")
 cloud = trimesh.points.PointCloud(output[0].cpu().detach())
 # Show the point cloud
 cloud.show()
+
+cloud1 = trimesh.points.PointCloud(vertices_ori[0].cpu().numpy(), colors=[255, 0, 0])
+cloud2 = trimesh.points.PointCloud(output[0].cpu().detach().numpy(), colors=[0, 255, 0])
+# cloud3 = trimesh.points.PointCloud(output2[0].cpu().detach().numpy(), colors=[0, 0, 255])
+scene = trimesh.Scene([cloud1, cloud2])
+scene.show()
+
 
 # Pairwise comparisons for all combinations of tensors
 tol = 1e-3
