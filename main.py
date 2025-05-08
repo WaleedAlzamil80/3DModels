@@ -16,7 +16,7 @@ device = 'cuda' if cuda else 'cpu'
 
 # Use the factory to dynamically get the dataloaders for specific dataset
 train_loader, test_loader = get_dataset_loader(args.Dataset, args)
-
+ 
 # Use the factory to dynamically get the model
 model = get_model(args.model, mode=args.mode, k=args.k).to(device)
 model = nn.DataParallel(model).to(device)

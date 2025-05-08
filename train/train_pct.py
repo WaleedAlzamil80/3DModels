@@ -45,7 +45,8 @@ def train(model, train_loader, test_loader, args):
 
             if args.rigid_augmentation_train:
                 vertices = apply_random_transformation(vertices, rotat=args.rotat)
-            vertices, eigen_vectors, eigen_values = batched_pca(vertices, 3)
+                vertices, eigen_vectors, eigen_values = batched_pca(vertices, 3)
+            vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
             # Forward pass
             with autocast(device_type='cuda'):
@@ -93,7 +94,8 @@ def train(model, train_loader, test_loader, args):
 
                 if args.rigid_augmentation_test:
                     vertices = apply_random_transformation(vertices, rotat=args.rotat)
-                vertices, eigen_vectors, eigen_values = batched_pca(vertices, 3)
+                    vertices, eigen_vectors, eigen_values = batched_pca(vertices, 3)
+                vertices = vertices - vertices.mean(dim=1, keepdim=True)
 
                 # Forward pass
                 with autocast(device_type='cuda'):

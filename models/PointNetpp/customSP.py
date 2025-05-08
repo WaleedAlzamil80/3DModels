@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import argparse
-from sampling.PointsCloud.knn import kdneighGPU
+from sampling.PointsCloud.knn import knn_neighbors as kdneighGPU
 
 class LBRD(nn.Module):
     def __init__(self, dim_in=128, dim_out=128, drop_out=0):
