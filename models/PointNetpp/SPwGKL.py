@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from models.FoldingNet.Mining import GaussianKernelConv
 from models.GraphCNN.DGCNN import EdgeConv
-from sampling.PointsCloud.knn import kdneighGPU
+from sampling.PointsCloud.knn import knn_neighbors
 
 import argparse
 
@@ -29,7 +29,7 @@ class TNetkd(nn.Module):
 
     def forward(self, x): # (Batch_Size, In_channels, Centroids, Samples)
         bs, _, c, n = x.shape
-        xnei = kdneighGPU(x.reshape(bs, -1, c*n).permute(0, 2, 1), self.args)[1]
+        xnei = knn_neighbors(x.reshape(bs, -1, c*n).permute(0, 2, 1), self.args)[1]
         kernels = self.kc(xnei)
         x = self.edgeconv1(x.reshape(bs, c*n, -1))
         x = self.edgeconv2(x)

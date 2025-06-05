@@ -36,6 +36,7 @@ else:
 model.eval()
 
 vertices_np = fm.load(args.path)[0] # np.array(mesh.vertices)
+# vertices_np = trimesh.load(args.path).vertices
 if args.clean:
     origin = np.mean(vertices_np, axis=0)
 
@@ -90,16 +91,21 @@ print(f"Regularization to prevent the model from shearing or scaling: {tnet_regu
 print(f"Determinant: {det_R}, Is Orthogonal: {is_orthogonal}")
 
 # Create a trimesh object for the point cloud
-cloud = trimesh.points.PointCloud(output[0].cpu().detach())
+# cloud = trimesh.points.PointCloud(output[0].cpu().detach())
 # Show the point cloud
-cloud.show()
+# cloud.show()
 
-cloud1 = trimesh.points.PointCloud(vertices_ori[0].cpu().numpy(), colors=[255, 0, 0])
-cloud2 = trimesh.points.PointCloud(output[0].cpu().detach().numpy(), colors=[0, 255, 0])
-# cloud3 = trimesh.points.PointCloud(output2[0].cpu().detach().numpy(), colors=[0, 0, 255])
-scene = trimesh.Scene([cloud1, cloud2])
+green = trimesh.points.PointCloud(vertices_ori[0].cpu().numpy(), colors=[0, 255, 0])        # green
+blue = trimesh.points.PointCloud(output[0].cpu().detach().numpy(), colors=[0, 0, 255])     # blue
+red = trimesh.points.PointCloud(output2[0].cpu().detach().numpy(), colors=[255, 0, 0])    # red
+scene = trimesh.Scene([green, blue])
 scene.show()
 
+scene1 = trimesh.Scene([green, red])
+scene1.show()
+
+scene2 = trimesh.Scene([blue, red])
+scene2.show()
 
 # Pairwise comparisons for all combinations of tensors
 tol = 1e-3
